@@ -7,9 +7,9 @@ use std::time::Duration;
 extern crate ndarray;
 
 
-pub struct Board {
+pub struct Well {
     // https://docs.rs/ndarray/latest/ndarray/
-    board: Array2<i32>,
+    grid: Array2<i32>,
 }
 
 pub enum Direction {
@@ -40,11 +40,11 @@ pub trait BoardCommandLine {
     fn stick_tetromino(&mut self, tetromino: Tetromino) -> ();
 }
 
-impl BoardCommandLine for Board {
+impl BoardCommandLine for Well {
 
-    fn new() -> Board {
-        return Board {
-            board: Array2::<i32>::zeros((60, 40)),
+    fn new() -> Well {
+        return Well {
+            grid: Array2::<i32>::zeros((60, 40)),
         }
     }
     /*
@@ -52,7 +52,7 @@ impl BoardCommandLine for Board {
     finished epoch.
      */
     fn render(&self) -> () {
-        println!("{:?}", self.board);
+        println!("{:?}", self.grid.to_string());
     }
 
     /*
@@ -82,7 +82,7 @@ pub trait BoardBrowser {
     fn render() -> ();
 }
 
-impl BoardBrowser for Board {
+impl BoardBrowser for Well {
     fn render() -> () {
 
     }

@@ -1,4 +1,4 @@
-use crate::board::{Direction, random_direction};
+use crate::well::{Direction, random_direction};
 
 /*
 These structs should be redesigned at least once.
@@ -38,7 +38,7 @@ impl TetrominoStraight for Tetromino {
     }
 
     fn rotate(&mut self) -> () {
-        // self.current_orientation += 1;
+
     }
 
 }
