@@ -12,7 +12,7 @@ pub struct Tetromino {
         0000
      */
     current_orientation: Direction,
-
+    shape: Vec<(i32, i32)>
 }
 
 pub enum BlockVector {
@@ -33,6 +33,7 @@ impl TetrominoStraight for Tetromino {
     fn new() -> Tetromino {
         return Tetromino {
             current_orientation: random_direction(),
+            shape: vec![(0,0), (0,1), (0,2), (0,3)]
         }
     }
 
@@ -52,6 +53,7 @@ impl TetrominoSquare for Tetromino {
     fn new() -> Self {
         return Tetromino {
             current_orientation: random_direction(),
+            shape: vec![(0,0), (0,1), (1,0), (1,1)]
         }
     }
 
@@ -62,7 +64,6 @@ impl TetrominoSquare for Tetromino {
 }
 
 pub trait TetrominoT {
-
     fn new() -> Self;
 }
 
@@ -70,25 +71,36 @@ impl TetrominoT for Tetromino {
     fn new() -> Self {
         return Tetromino {
             current_orientation: random_direction(),
+            shape: vec![(0,0), (0,1), (0,2), (1,1)]
         }
     }
 
 }
 
 pub trait TetrominoL {
-
+    fn new() -> Self;
 }
 
 impl TetrominoL for Tetromino {
-
+    fn new() -> Self {
+        return Tetromino {
+            current_orientation: random_direction(),
+            shape: vec![(0,0), (1,0), (2,0), (2,1)]
+        }
+    }
 }
 
 pub trait TetrominoSkew {
-
+    fn new() -> Self;
 }
 
 impl TetrominoSkew for Tetromino {
-
+    fn new() -> Self {
+        return Tetromino {
+            current_orientation: random_direction(),
+            shape: vec![(1,0), (1,1), (0,1), (0,2)]
+        }
+    }
 }
 
 #[cfg(test)]

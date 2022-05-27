@@ -1,8 +1,15 @@
 use crate::tetromino::Tetromino;
 use rand::Rng;
+use self::ndarray::Array2;
+use std::thread::sleep;
+use std::time::Duration;
+
+extern crate ndarray;
+
 
 pub struct Board {
     // https://docs.rs/ndarray/latest/ndarray/
+    board: Array2<i32>,
 }
 
 pub enum Direction {
@@ -26,18 +33,37 @@ pub trait BoardCommandLine {
     /*
     pub is implied in traits
      */
-    fn render() -> ();
+    fn new() -> Self;
+    fn render(&self) -> ();
+    fn run(&self) -> ();
     fn move_tetromino(&mut self, tetromino: Tetromino, direction: Direction) -> ();
     fn stick_tetromino(&mut self, tetromino: Tetromino) -> ();
 }
 
 impl BoardCommandLine for Board {
+
+    fn new() -> Board {
+        return Board {
+            board: Array2::<i32>::zeros((60, 40)),
+        }
+    }
     /*
     Gradually increases the refresh rate, moving, the tetromino down a block faster with each
     finished epoch.
      */
-    fn render() -> () {
-        todo!()
+    fn render(&self) -> () {
+        println!("{:?}", self.board);
+    }
+
+    /*
+    Render the tetris board
+     */
+    fn run(&self) -> () {
+        let duration = Duration::new(1, 0);
+        loop {
+            self.render();
+            sleep(duration);
+        }
     }
 
     fn move_tetromino(&mut self, tetromino: Tetromino, direction: Direction) -> () {
