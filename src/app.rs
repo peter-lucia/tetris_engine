@@ -44,6 +44,7 @@ impl App {
 }
 
 fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
+    // define the layout chunks
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
         .margin(4)
@@ -54,21 +55,22 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
             ].as_ref()
         )
         .split(f.size());
-    let mut block = Block::default().title("Tetris (q to quit)")
-        .title_alignment(Alignment::Center).borders(Borders::ALL);
-    f.render_widget(block, chunks[0]);
-    let block = Block::default().title("Info")
-        .title_alignment(Alignment::Center).borders(Borders::ALL);
-    f.render_widget(block, chunks[1]);
 
-    let canvas = Canvas::default()
-        .block(Block::default().borders(Borders::ALL).title("Title"))
+    // draw and render the tetris well
+    let mut block = Canvas::default().block(Block::default()
+        .borders(Borders::ALL).title("Tetris (q to quit)")
+        .title_alignment(Alignment::Center))
         .paint(|ctx| {
             ctx.draw(&app.shape);
         })
         .x_bounds([10.0, 110.0])
         .y_bounds([10.0, 110.0]);
-    f.render_widget(canvas, chunks[0]);
+    f.render_widget(block, chunks[0]);
+
+    // draw and render the information pane
+    let block = Block::default().title("Info")
+        .title_alignment(Alignment::Center).borders(Borders::ALL);
+    f.render_widget(block, chunks[1]);
 }
 
 pub fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<()> {
@@ -86,16 +88,16 @@ pub fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Resu
                     return Ok(());
                 }
                 KeyCode::Down => {
-                    app.shape.y -= 1.0;
+                    app.shape.y -= 5.0;
                 }
                 KeyCode::Up => {
-                    app.shape.y += 1.0;
+                    app.shape.y += 5.0;
                 }
                 KeyCode::Right => {
-                    app.shape.x += 1.0;
+                    app.shape.x += 2.0;
                 }
                 KeyCode::Left => {
-                    app.shape.x -= 1.0;
+                    app.shape.x -= 2.0;
                 }
                 _ => {}
             }
