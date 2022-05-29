@@ -1,23 +1,17 @@
 use std::io;
-use tui::{backend::CrosstermBackend, Terminal};
-use unicode_width::UnicodeWidthStr;
+use tui::{Terminal};
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
-    execute,
-    terminal::{enable_raw_mode, disable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+    event::{self, Event, KeyCode},
 };
-use std::time::Duration;
 use tui::{
     backend::Backend,
     layout::{Constraint, Direction, Layout, Alignment},
     widgets::{Block, Borders},
     Frame,
-    style::{Color, Modifier, Style},
-    text::{Span, Spans, Text},
-    widgets::{List, ListItem, Paragraph},
+    style::{Color},
+
 };
-use tui::widgets::canvas::{Canvas, Map, MapResolution, Rectangle};
-use tui::layout::Rect;
+use tui::widgets::canvas::{Canvas, Rectangle};
 use std::cmp::min;
 
 // https://github.com/fdehau/tui-rs/blob/v0.18.0/examples/canvas.rs

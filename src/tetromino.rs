@@ -1,7 +1,3 @@
-use crate::well::{Direction, random_direction};
-use ndarray;
-use ndarray::array;
-use ndarray::Array2;
 
 
 // https://www.youtube.com/watch?v=8OK8_tHeCIA
@@ -164,7 +160,6 @@ impl TetrominoSkew for Tetromino {
 
 #[cfg(test)]
 mod tests {
-    use crate::tetromino;
     use crate::tetromino::{TetrominoL, Tetromino};
 
     #[test]
@@ -215,6 +210,15 @@ mod tests {
                 [0,1,1,1],
                 [0,1,0,0],
                 [0,0,0,0],
+                [0,0,0,0]
+            ];
+        assert_eq!(t.area, expected_result);
+        t.rotate();
+        expected_result =
+            [
+                [0,0,1,1],
+                [0,0,0,1],
+                [0,0,0,1],
                 [0,0,0,0]
             ];
         assert_eq!(t.area, expected_result);

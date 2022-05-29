@@ -9,7 +9,6 @@ use crossterm::{
 };
 use std::{io, thread, error::Error};
 use tui::{
-    backend::Backend,
     Terminal,
 };
 use tui::backend::CrosstermBackend;
