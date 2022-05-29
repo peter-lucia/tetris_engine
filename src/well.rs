@@ -19,7 +19,6 @@ use crossterm::event::{poll, read, Event};
 use crate::tetromino;
 
 pub struct Well {
-    // https://docs.rs/ndarray/latest/ndarray/
     grid: [[i32; 12+2]; 18+2],
     stdout: Stdout,
     current_tetromino: Tetromino,
@@ -78,7 +77,10 @@ impl BoardCommandLine for Well {
             for j in 0..self.grid[0].len() {
                 let mut output = "█".black();
 
-                if self.grid[i][j] == 1 {
+                if self.grid[i][j] == 1 ||
+                    ((self.current_tetromino.x <= j as f64 && j as f64 <= self.current_tetromino.x) &&
+                    (self.current_tetromino.y <= i as f64 && i as f64 <= self.current_tetromino.y))
+                    {
                     output = "█".magenta();
                 }
                 self.stdout.queue(cursor::MoveTo(i as u16, j as u16));
