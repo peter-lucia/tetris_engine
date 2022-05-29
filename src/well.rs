@@ -97,18 +97,22 @@ impl BoardCommandLine for Well {
     fn run(&mut self) -> () {
         loop {
             self.render();
-            if poll(Duration::from_millis(500)).unwrap() {
+            if poll(Duration::from_millis(1000)).unwrap() {
                 match read().unwrap() {
                     Event::Key(event) => {
                         if event.code == KeyCode::Char('q') {
+                            self.stdout.execute(terminal::Clear(terminal::ClearType::FromCursorUp));
                             // exit
                             return;
                         }
                         else if event.code == KeyCode::Left {
+                            self.move_tetromino(Direction::Left);
                         }
                         else if event.code == KeyCode::Right {
+                            self.move_tetromino(Direction::Right);
                         }
                         else if event.code == KeyCode::Down {
+                            self.move_tetromino(Direction::Down);
                         }
                         else if event.code == KeyCode::Up {
                         }
@@ -121,8 +125,6 @@ impl BoardCommandLine for Well {
                     },
                 }
             }
-            let duration = Duration::from_millis(500);
-            sleep(duration);
             self.move_tetromino(Direction::Down);
         }
     }
@@ -130,9 +132,14 @@ impl BoardCommandLine for Well {
     fn move_tetromino(&mut self, direction: Direction) -> () {
         match direction {
             Direction::Left => {
-
+                if self.current_tetromino.y > 0 {
+                    self.current_tetromino.y -= 1;
+                }
             }
             Direction::Right => {
+                if self.current_tetromino.y < self.grid[0].len() {
+                    self.current_tetromino.y += 1;
+                }
 
             }
             Direction::Down => {
@@ -141,7 +148,7 @@ impl BoardCommandLine for Well {
                 }
 
             }
-            Direction::Up => {
+            _ => {
 
             }
         }
