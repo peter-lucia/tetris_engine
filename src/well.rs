@@ -78,10 +78,11 @@ impl BoardCommandLine for Well {
                 let mut output = "█".black();
 
                 if self.grid[i][j] == 1 ||
-                    ((self.current_tetromino.x <= j as f64 && j as f64 <= self.current_tetromino.x) &&
-                    (self.current_tetromino.y <= i as f64 && i as f64 <= self.current_tetromino.y))
+                    ((self.current_tetromino.x <= j && j <= self.current_tetromino.x) &&
+                    (self.current_tetromino.y <= i && i <= self.current_tetromino.y) &&
+                    self.current_tetromino.area[i - self.current_tetromino.y as usize][j - self.current_tetromino.x as usize] == 1)
                     {
-                    output = "█".magenta();
+                    output = "█".white();
                 }
                 self.stdout.queue(cursor::MoveTo(i as u16, j as u16));
                 self.stdout.queue(style::PrintStyledContent(output));
@@ -135,8 +136,8 @@ impl BoardCommandLine for Well {
 
             }
             Direction::Down => {
-                if self.current_tetromino.x < self.grid.len() as f64 {
-                    self.current_tetromino.x += 1.0;
+                if self.current_tetromino.x < self.grid.len() {
+                    self.current_tetromino.x += 1;
                 }
 
             }

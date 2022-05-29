@@ -8,9 +8,9 @@ Every tetromino will be made from a 4x4 grid
  */
 
 pub struct Tetromino {
-    area: [[i32; 4]; 4],
-    pub x: f64,
-    pub y: f64,
+    pub area: [[i32; 4]; 4],
+    pub x: usize,
+    pub y: usize,
 }
 
 impl Tetromino {
@@ -26,8 +26,8 @@ impl Default for Tetromino {
             [0,0,1,0],
             [0,0,1,0],
             [0,0,1,0]],
-            x: 0.0,
-            y: 0.0,
+            x: 0,
+            y: 6,
         }
     }
 }
