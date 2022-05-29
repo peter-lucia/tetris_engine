@@ -1,15 +1,28 @@
-use crate::tetromino::Tetromino;
+use crate::tetromino::{
+    Tetromino,
+    TetrominoL,
+};
 use rand::Rng;
 use std::thread::sleep;
 use std::time::Duration;
 use std::io::{Stdout, Write, stdout};
-use crossterm::{QueueableCommand, cursor, style, ExecutableCommand, terminal};
+use crossterm::{
+    QueueableCommand,
+    cursor,
+    style,
+    terminal,
+    ExecutableCommand,
+    event::KeyCode
+};
 use crossterm::style::Stylize;
+use crossterm::event::{poll, read, Event};
+use crate::tetromino;
 
 pub struct Well {
     // https://docs.rs/ndarray/latest/ndarray/
     grid: [[i32; 12+2]; 18+2],
     stdout: Stdout,
+    current_tetromino: Tetromino,
 }
 
 pub enum Direction {
@@ -36,8 +49,8 @@ pub trait BoardCommandLine {
     fn new() -> Self;
     fn render(&mut self) -> ();
     fn run(&mut self) -> ();
-    fn move_tetromino(&mut self, tetromino: Tetromino, direction: Direction) -> ();
-    fn stick_tetromino(&mut self, tetromino: Tetromino) -> ();
+    fn move_tetromino(&mut self, direction: Direction) -> ();
+    fn stick_tetromino(&mut self) -> ();
     fn quit(&mut self) -> ();
 }
 
@@ -51,6 +64,7 @@ impl BoardCommandLine for Well {
             // where the well is of height 18 with two lines for the top (if needed) and bottom
             grid: [[0; 14] ; 20],
             stdout: stdout,
+            current_tetromino: Tetromino::make_l(),
         };
         return result;
     }
@@ -59,7 +73,7 @@ impl BoardCommandLine for Well {
     finished epoch.
      */
     fn render(&mut self) -> () {
-        // println!("{:?}", self.grid);
+
         for i in 0..self.grid.len() {
             for j in 0..self.grid[0].len() {
                 let mut output = "█".black();
@@ -69,6 +83,7 @@ impl BoardCommandLine for Well {
                 }
                 self.stdout.queue(cursor::MoveTo(i as u16, j as u16));
                 self.stdout.queue(style::PrintStyledContent(output));
+                self.stdout.flush();
             }
         }
     }
@@ -77,24 +92,69 @@ impl BoardCommandLine for Well {
     Render the tetris board
      */
     fn run(&mut self) -> () {
-        let duration = Duration::new(1, 0);
         loop {
             self.render();
+            if poll(Duration::from_millis(500)).unwrap() {
+                match read().unwrap() {
+                    Event::Key(event) => {
+                        if event.code == KeyCode::Char('q') {
+                            // exit
+                            return;
+                        }
+                        else if event.code == KeyCode::Left {
+                        }
+                        else if event.code == KeyCode::Right {
+                        }
+                        else if event.code == KeyCode::Down {
+                        }
+                        else if event.code == KeyCode::Up {
+                        }
+                    },
+                    Event::Mouse(event) => {
+                        println!("{:?}", event)
+                    },
+                    Event::Resize(width, height) => {
+                        println!("New size {}x{}", width, height)
+                    },
+                }
+            }
+            let duration = Duration::from_millis(500);
             sleep(duration);
+            self.move_tetromino(Direction::Down);
         }
+    }
+
+    fn move_tetromino(&mut self, direction: Direction) -> () {
+        match direction {
+            Direction::Left => {
+
+            }
+            Direction::Right => {
+
+            }
+            Direction::Down => {
+                if self.current_tetromino.x < self.grid.len() as f64 {
+                    self.current_tetromino.x += 1.0;
+                }
+
+            }
+            Direction::Up => {
+
+            }
+        }
+
+
+    }
+
+    fn stick_tetromino(&mut self) -> () {
+        todo!("Write the tetromino to the grid.");
+        todo!("Select a new tetromino and put it at the top.");
+        todo!("Increase the refresh rate slightly.");
     }
 
     fn quit(&mut self) -> () {
 
         self.stdout.flush();
-    }
-
-    fn move_tetromino(&mut self, tetromino: Tetromino, direction: Direction) -> () {
-
-    }
-
-    fn stick_tetromino(&mut self, tetromino: Tetromino) -> () {
-        todo!()
     }
 }
 
