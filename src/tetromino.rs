@@ -16,6 +16,12 @@ pub struct Tetromino {
     area: [[i32; 4]; 4],
 }
 
+impl Tetromino {
+    pub fn rotate(&mut self) -> () {
+        rotate(self);
+    }
+}
+
 pub enum BlockVector {
     Straight,
     Left,
@@ -26,7 +32,7 @@ fn rotate(t: &mut Tetromino) -> () {
     let n = t.area.len();
     let m = t.area[0].len();
 
-    // transpose
+    // transpose across left to right diagonal
     for i in 0..n {
         for j in i..m {
             let tmp = t.area[i][j];
@@ -35,14 +41,13 @@ fn rotate(t: &mut Tetromino) -> () {
         }
     }
     // reverse each row
+    // same as a flip w/ respect to middle column
     for i in 0..n {
-        let mut tmp = t.area[0];
-        tmp.reverse();
-        t.area[i] = tmp;
+        t.area[i].reverse();
     }
 }
 
-fn rotate_90(t: &mut Tetromino) -> () {
+fn rotate_alt(t: &mut Tetromino) -> () {
     let n = t.area.len();
     let m = t.area[0].len();
 
@@ -153,29 +158,70 @@ impl TetrominoSkew for Tetromino {
 #[cfg(test)]
 mod tests {
     use crate::tetromino;
-    use crate::tetromino::{rotate, TetrominoL, Tetromino, rotate_90};
+    use crate::tetromino::{TetrominoL, Tetromino};
 
     #[test]
-    fn test_rotate_1() -> () {
+    fn test_rotate() -> () {
         let mut t = Tetromino::make_l();
-        rotate_90(&mut t);
+        t.area =
+            [[1,0,0,0],
+             [1,0,0,0],
+             [1,1,0,0],
+             [1,1,0,0],
+        ];
+        t.rotate();
         let mut expected_result =
-            [[0,1,1,1],
-             [0,1,0,0],
+            [[1,1,1,1],
+             [1,1,0,0],
              [0,0,0,0],
              [0,0,0,0]];
         assert_eq!(t.area, expected_result);
     }
 
+    fn test_rotate_90_basic() {
+
+        let mut t = Tetromino::make_l();
+        t.area =
+            [
+                [1,0,0,0],
+                [1,0,0,0],
+                [1,1,0,0],
+                [1,1,0,0],
+            ];
+        t.rotate();
+        let mut expected_result =
+            [
+                [1,1,1,1],
+                [1,1,0,0],
+                [0,0,0,0],
+                [0,0,0,0],
+            ];
+        assert_eq!(t.area, expected_result);
+    }
+
     #[test]
-    fn test_rotate_2() -> () {
+    fn test_rotate_90_tetromino() -> () {
+        let mut t = Tetromino::make_l();
+        t.rotate();
+        let mut expected_result =
+            [
+                [0,1,1,1],
+                [0,1,0,0],
+                [0,0,0,0],
+                [0,0,0,0]
+            ];
+        assert_eq!(t.area, expected_result);
+    }
+
+    #[test]
+    fn test_rotate_full() -> () {
         let mut t = Tetromino::make_l();
         t.area =
             [[1,2,3,4],
              [5,6,7,8],
              [9,10,11,12],
              [13,14,15,16]];
-        rotate_90(&mut t);
+        t.rotate();
         let mut expected_result =
             [[13,9,5,1],
              [14,10,6,2],
