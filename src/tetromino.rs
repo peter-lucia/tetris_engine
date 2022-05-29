@@ -28,6 +28,9 @@ pub enum BlockVector {
     Right
 }
 
+/*
+Rotate 90 degrees clockwise
+ */
 fn rotate(t: &mut Tetromino) -> () {
     let n = t.area.len();
     let m = t.area[0].len();
@@ -47,6 +50,10 @@ fn rotate(t: &mut Tetromino) -> () {
     }
 }
 
+/*
+Rotate 90 degrees clockwise alternative implementation,
+same concept
+ */
 fn rotate_alt(t: &mut Tetromino) -> () {
     let n = t.area.len();
     let m = t.area[0].len();
