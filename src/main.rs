@@ -13,9 +13,6 @@ use app::{
     App,
 };
 
-fn run_tetris() {
-}
-
 
 fn main() -> Result<()> {
     let mut board: Well = BoardCommandLine::new();
