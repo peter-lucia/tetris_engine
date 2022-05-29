@@ -18,6 +18,7 @@ use tui::{
 };
 use tui::widgets::canvas::{Canvas, Map, MapResolution, Rectangle};
 use tui::layout::Rect;
+use std::cmp::min;
 
 // https://github.com/fdehau/tui-rs/blob/v0.18.0/examples/canvas.rs
 /// App holds the state of the application
@@ -35,8 +36,8 @@ impl App {
             shape: Rectangle {
                 x: 10.0,
                 y: 30.0,
-                width: 10.0,
-                height: 10.0,
+                width: 4.0,
+                height: 8.0,
                 color: Color::Yellow,
             },
         }
@@ -76,10 +77,12 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
 pub fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<()> {
     loop {
 
+        app.shape.y -= 5.0;
         // update the terminal
         terminal.draw(|f| {
-            ui(f, &app)
+            ui(f, &app);
         })?;
+
 
         if let Event::Key(key) = event::read()? {
             match key.code {
@@ -88,7 +91,7 @@ pub fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Resu
                     return Ok(());
                 }
                 KeyCode::Down => {
-                    app.shape.y -= 5.0;
+                    app.shape.y -= min(5, 0) as f64;
                 }
                 KeyCode::Up => {
                     app.shape.y += 5.0;
@@ -97,7 +100,7 @@ pub fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Resu
                     app.shape.x += 2.0;
                 }
                 KeyCode::Left => {
-                    app.shape.x -= 2.0;
+                    app.shape.x -= min(2, 0) as f64;
                 }
                 _ => {}
             }
