@@ -1,15 +1,16 @@
 
 
+// Useful:
 // https://www.youtube.com/watch?v=8OK8_tHeCIA
 
 /*
-These structs should be redesigned at least once.
+Every tetromino will be made from a 4x4 grid
  */
+
 pub struct Tetromino {
-    /*
-    Every tetromino will be made from a 4x4 grid
-     */
     area: [[i32; 4]; 4],
+    pub x: f64,
+    pub y: f64,
 }
 
 impl Tetromino {
@@ -18,10 +19,17 @@ impl Tetromino {
     }
 }
 
-pub enum BlockVector {
-    Straight,
-    Left,
-    Right
+impl Default for Tetromino {
+    fn default() -> Tetromino {
+        Tetromino {
+            area: [[0,0,1,0],
+            [0,0,1,0],
+            [0,0,1,0],
+            [0,0,1,0]],
+            x: 0.0,
+            y: 0.0,
+        }
+    }
 }
 
 /*
@@ -89,6 +97,7 @@ impl TetrominoStraight for Tetromino {
              [0,0,1,0],
              [0,0,1,0],
              [0,0,1,0]],
+            ..Default::default()
         }
     }
 
@@ -105,6 +114,7 @@ impl TetrominoSquare for Tetromino {
                   [0,1,1,0],
                   [0,1,1,0],
                   [0,0,0,0]],
+            ..Default::default()
         }
     }
 }
@@ -121,6 +131,7 @@ impl TetrominoT for Tetromino {
              [1,1,1,0],
              [0,1,0,0],
              [0,0,0,0]],
+            ..Default::default()
         }
     }
 
@@ -138,6 +149,7 @@ impl TetrominoL for Tetromino {
              [1,0,0,0],
              [1,1,0,0],
              [0,0,0,0]],
+            ..Default::default()
         }
     }
 }
@@ -154,6 +166,7 @@ impl TetrominoSkew for Tetromino {
              [0,1,1,0],
              [0,0,0,0],
              [0,0,0,0]],
+            ..Default::default()
         }
     }
 }
