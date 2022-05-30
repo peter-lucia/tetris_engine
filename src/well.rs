@@ -97,7 +97,7 @@ impl BoardCommandLine for Well {
         return result;
     }
 
-    /// Render the tetris board
+    /// Render the tetromino 4x4 grid onto the tetris well
     fn render(&mut self, output_color: StyledContent<&str>) -> () {
 
         let x_min = max(self.current_tetromino.y, 0);
