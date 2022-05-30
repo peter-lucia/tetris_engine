@@ -14,12 +14,14 @@ use crossterm::{
     ExecutableCommand,
     event::KeyCode
 };
-use crossterm::style::Stylize;
+use crossterm::style::{Stylize, StyledContent};
 use crossterm::event::{poll, read, Event};
 use crate::tetromino;
+use std::error::Error;
+use std::cmp::{min, max};
 
 pub struct Well {
-    grid: [[i32; 12+2]; 18+2],
+    grid: [[i32; WELL_WIDTH]; WELL_HEIGHT],
     stdout: Stdout,
     current_tetromino: Tetromino,
 }
@@ -41,13 +43,16 @@ pub fn random_direction() -> Direction {
     }
 }
 
+const WELL_WIDTH: usize = 14;
+const WELL_HEIGHT: usize = 20;
+
 pub trait BoardCommandLine {
     /*
     pub is implied in traits
      */
     fn new() -> Self;
-    fn render(&mut self) -> ();
-    fn run(&mut self) -> ();
+    fn render(&mut self, output_color: StyledContent<&str>) -> ();
+    fn run(&mut self) -> crossterm::Result<()>;
     fn move_tetromino(&mut self, direction: Direction) -> ();
     fn stick_tetromino(&mut self) -> ();
     fn quit(&mut self) -> ();
@@ -58,52 +63,73 @@ impl BoardCommandLine for Well {
     fn new() -> Well {
         let mut stdout = stdout();
         stdout.execute(terminal::Clear(terminal::ClearType::All));
-        let result = Well {
+        let mut result = Well {
             // |<---------- 12 --------->| plus 2 chars to display edge of wells = 14 x 20
             // where the well is of height 18 with two lines for the top (if needed) and bottom
-            grid: [[0; 14] ; 20],
+            grid: [[0; WELL_WIDTH] ; WELL_HEIGHT],
             stdout: stdout,
             current_tetromino: Tetromino::make_l(),
         };
-        return result;
-    }
-    /*
-    Gradually increases the refresh rate, moving, the tetromino down a block faster with each
-    finished epoch.
-     */
-    fn render(&mut self) -> () {
-
-        for i in 0..self.grid.len() {
-            for j in 0..self.grid[0].len() {
-                let mut output = "█".black();
-
-                if self.grid[i][j] == 1 ||
-                    ((self.current_tetromino.x <= j && j <= self.current_tetromino.x) &&
-                    (self.current_tetromino.y <= i && i <= self.current_tetromino.y) &&
-                    self.current_tetromino.area[i - self.current_tetromino.y as usize][j - self.current_tetromino.x as usize] == 1)
-                    {
+        // paint the outline of the board
+        let mut output = "█".black();
+        for i in 0..WELL_HEIGHT{
+            for j in 0..WELL_WIDTH {
+                if i == 0 || i == WELL_HEIGHT - 1 {
                     output = "█".white();
+                    result.grid[i][j] = 1;
                 }
-                self.stdout.queue(cursor::MoveTo(i as u16, j as u16));
-                self.stdout.queue(style::PrintStyledContent(output));
-                self.stdout.flush();
+                else if j == 0 || j == WELL_WIDTH - 1 {
+                    output = "█".white();
+                    result.grid[i][j] = 1;
+                } else {
+                    output = "█".black();
+                    result.grid[i][j] = 0;
+                }
+                result.stdout.queue(cursor::MoveTo(i as u16, j as u16));
+                result.stdout.queue(style::PrintStyledContent(output));
+                result.stdout.flush();
             }
         }
+        return result;
     }
 
     /*
     Render the tetris board
      */
-    fn run(&mut self) -> () {
+    fn render(&mut self, output_color: StyledContent<&str>) -> () {
+
+
+        let x_min = max(self.current_tetromino.y, 0);
+        let x_max = min(self.current_tetromino.y + 3, WELL_HEIGHT - 1);
+        let y_min = max(self.current_tetromino.x, 0);
+        let y_max = min(self.current_tetromino.x + 3, WELL_WIDTH - 1);
+        for i in x_min..x_max {
+            for j in y_min..y_max {
+                let ii = max(0, i - self.current_tetromino.y);
+                let jj = max(0, j - self.current_tetromino.x);
+                if self.current_tetromino.area[ii][jj] == 1 && self.grid[i][j] != 1 {
+                    self.stdout.queue(cursor::MoveTo(i as u16, j as u16));
+                    self.stdout.queue(style::PrintStyledContent(output_color));
+                    self.stdout.flush();
+                }
+            }
+        }
+    }
+
+    /*
+    Gradually increases the refresh rate, moving, the tetromino down a block faster with each
+    finished epoch.
+     */
+    fn run(&mut self) -> crossterm::Result<()> {
         loop {
-            self.render();
-            if poll(Duration::from_millis(1000)).unwrap() {
+            self.render( "█".white());
+            if poll(Duration::from_millis(5))? {
                 match read().unwrap() {
                     Event::Key(event) => {
                         if event.code == KeyCode::Char('q') {
                             self.stdout.execute(terminal::Clear(terminal::ClearType::FromCursorUp));
                             // exit
-                            return;
+                            return Ok(());
                         }
                         else if event.code == KeyCode::Left {
                             self.move_tetromino(Direction::Left);
@@ -115,6 +141,7 @@ impl BoardCommandLine for Well {
                             self.move_tetromino(Direction::Down);
                         }
                         else if event.code == KeyCode::Up {
+                            self.move_tetromino(Direction::Up);
                         }
                     },
                     Event::Mouse(event) => {
@@ -125,11 +152,13 @@ impl BoardCommandLine for Well {
                     },
                 }
             }
-            self.move_tetromino(Direction::Down);
+            //
+            // self.move_tetromino(Direction::Down);
         }
     }
 
     fn move_tetromino(&mut self, direction: Direction) -> () {
+        self.render( "█".black());
         match direction {
             Direction::Left => {
                 if self.current_tetromino.y > 0 {
@@ -137,14 +166,16 @@ impl BoardCommandLine for Well {
                 }
             }
             Direction::Right => {
-                if self.current_tetromino.y < self.grid[0].len() {
+                if self.current_tetromino.y < WELL_WIDTH - 1 {
                     self.current_tetromino.y += 1;
+
                 }
 
             }
             Direction::Down => {
-                if self.current_tetromino.x < self.grid.len() {
-                    self.current_tetromino.x += 1;
+                println!("Current x: {}, max: {}", self.current_tetromino.x, self.grid.len());
+                if self.current_tetromino.x < WELL_HEIGHT - 1 {
+                    self.current_tetromino.x += 1
                 }
 
             }
@@ -152,8 +183,7 @@ impl BoardCommandLine for Well {
 
             }
         }
-
-
+        self.render( "█".white());
     }
 
     fn stick_tetromino(&mut self) -> () {

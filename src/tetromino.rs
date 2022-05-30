@@ -7,8 +7,11 @@
 Every tetromino will be made from a 4x4 grid
  */
 
+const TETROMINO_WIDTH: usize = 4;
+const TETROMINO_HEIGHT: usize = 4;
+
 pub struct Tetromino {
-    pub area: [[i32; 4]; 4],
+    pub area: [[i32; TETROMINO_WIDTH]; TETROMINO_HEIGHT],
     pub x: usize,
     pub y: usize,
 }
