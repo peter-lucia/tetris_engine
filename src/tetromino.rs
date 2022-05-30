@@ -7,8 +7,11 @@
 Every tetromino will be made from a 4x4 grid
  */
 
+use std::cmp::{max, min};
+
 pub const TETROMINO_WIDTH: usize = 4;
 pub const TETROMINO_HEIGHT: usize = 4;
+
 
 pub struct Tetromino {
     pub area: [[i32; TETROMINO_WIDTH]; TETROMINO_HEIGHT],
@@ -19,6 +22,26 @@ pub struct Tetromino {
 impl Tetromino {
     pub fn rotate(&mut self) -> () {
         rotate(self);
+    }
+
+    /// Gets (min_x, max_x, min_y, max_y) the current tetromino piece fills
+    /// in the current well coordinate plane
+    pub fn get_xy_min_max(&self) -> (usize, usize, usize, usize) {
+        let mut min_x: usize = 0;
+        let mut max_x: usize = 0;
+        let mut min_y: usize = 0;
+        let mut max_y: usize = 0;
+        for i in 0..TETROMINO_HEIGHT {
+            for j in 0..TETROMINO_WIDTH {
+                if self.area[i][j] == 1 {
+                    min_x = min(min_x, i);
+                    max_x = max(max_x, i);
+                    min_y = min(min_y, j);
+                    max_y = max(max_y, j);
+                }
+            }
+        }
+        return (self.x + min_x, self.x + max_x, self.y + min_y, self.y + max_y);
     }
 }
 

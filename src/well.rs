@@ -1,4 +1,10 @@
-use crate::tetromino::{Tetromino, TetrominoL, TETROMINO_HEIGHT, TETROMINO_WIDTH, TetrominoStraight};
+use crate::tetromino::{
+    Tetromino,
+    TetrominoL,
+    TETROMINO_HEIGHT,
+    TETROMINO_WIDTH,
+    TetrominoStraight,
+};
 use rand::Rng;
 use std::thread::sleep;
 use std::time::Duration;
@@ -57,6 +63,7 @@ pub trait BoardCommandLine {
 
 impl BoardCommandLine for Well {
 
+    /// Creates a new well for command line
     fn new() -> Well {
         let mut stdout = stdout();
         stdout.execute(terminal::Clear(terminal::ClearType::All));
@@ -90,11 +97,8 @@ impl BoardCommandLine for Well {
         return result;
     }
 
-    /*
-    Render the tetris board
-     */
+    /// Render the tetris board
     fn render(&mut self, output_color: StyledContent<&str>) -> () {
-
 
         let x_min = max(self.current_tetromino.y, 0);
         let x_max = min(self.current_tetromino.y + TETROMINO_HEIGHT, WELL_HEIGHT);
@@ -113,10 +117,8 @@ impl BoardCommandLine for Well {
         }
     }
 
-    /*
-    Gradually increases the refresh rate, moving, the tetromino down a block faster with each
-    finished epoch.
-     */
+    /// Gradually increases the refresh rate, moving, the tetromino down a block faster with each
+    /// finished epoch.
     fn run(&mut self) -> crossterm::Result<()> {
         loop {
             self.render( "█".white());
@@ -156,27 +158,33 @@ impl BoardCommandLine for Well {
 
     fn move_tetromino(&mut self, direction: Direction) -> () {
         self.render( "█".black());
+        let (min_x, max_x, min_y, max_y) = self.current_tetromino
+            .get_xy_min_max();
         match direction {
             Direction::Left => {
-                if self.current_tetromino.y > 0 {
+                if min_y > 1 {
                     self.current_tetromino.y -= 1;
                 }
             }
             Direction::Right => {
-                if self.current_tetromino.y < WELL_WIDTH - 1 {
+                ///  - - - - |
+                ///  x x x x |
+                ///  - - - - |
+                if max_y < WELL_WIDTH + 3 {
                     self.current_tetromino.y += 1;
                 }
 
             }
             Direction::Down => {
-                println!("Current x: {}, max: {}", self.current_tetromino.x, self.grid.len());
-                if self.current_tetromino.x < WELL_HEIGHT - 1 {
+                if max_x < WELL_HEIGHT - 7 {
                     self.current_tetromino.x += 1
                 }
 
             }
-            _ => {
-
+            Direction::Up => {
+                if min_x > 1 {
+                    self.current_tetromino.x -= 1
+                }
             }
         }
         self.render( "█".white());
