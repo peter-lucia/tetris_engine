@@ -9,8 +9,8 @@ pub const TETROMINO_HEIGHT: usize = 4;
 ///     * https://www.youtube.com/watch?v=8OK8_tHeCIA
 pub struct Tetromino {
     pub area: [[i32; TETROMINO_WIDTH]; TETROMINO_HEIGHT],
-    pub x: usize,
-    pub y: usize,
+    pub x: usize,  /// x (height) position in the well coordinate plane
+    pub y: usize,  /// y (width) position in the well coordinate plane
 }
 
 impl Tetromino {
