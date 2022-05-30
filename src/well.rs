@@ -1,7 +1,4 @@
-use crate::tetromino::{
-    Tetromino,
-    TetrominoL,
-};
+use crate::tetromino::{Tetromino, TetrominoL, TETROMINO_HEIGHT, TETROMINO_WIDTH, TetrominoStraight};
 use rand::Rng;
 use std::thread::sleep;
 use std::time::Duration;
@@ -100,9 +97,9 @@ impl BoardCommandLine for Well {
 
 
         let x_min = max(self.current_tetromino.y, 0);
-        let x_max = min(self.current_tetromino.y + 3, WELL_HEIGHT - 1);
+        let x_max = min(self.current_tetromino.y + TETROMINO_HEIGHT, WELL_HEIGHT);
         let y_min = max(self.current_tetromino.x, 0);
-        let y_max = min(self.current_tetromino.x + 3, WELL_WIDTH - 1);
+        let y_max = min(self.current_tetromino.x + TETROMINO_WIDTH, WELL_WIDTH);
         for i in x_min..x_max {
             for j in y_min..y_max {
                 let ii = max(0, i - self.current_tetromino.y);
@@ -168,7 +165,6 @@ impl BoardCommandLine for Well {
             Direction::Right => {
                 if self.current_tetromino.y < WELL_WIDTH - 1 {
                     self.current_tetromino.y += 1;
-
                 }
 
             }
