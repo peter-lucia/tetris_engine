@@ -142,6 +142,11 @@ impl BoardCommandLine for Well {
                         else if event.code == KeyCode::Up {
                             self.move_tetromino(Direction::Up);
                         }
+                        else if event.code == KeyCode::Char('r') {
+                            self.render( "█".black());
+                            self.current_tetromino.rotate();
+                            self.render( "█".white());
+                        }
                     },
                     Event::Mouse(event) => {
                         println!("{:?}", event)
