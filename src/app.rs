@@ -5,7 +5,6 @@ use crossterm::{
 };
 use std::cmp::min;
 
-// https://github.com/fdehau/tui-rs/blob/v0.18.0/examples/canvas.rs
 /// App holds the state of the application
 pub struct App {
     shape: Tetromino,

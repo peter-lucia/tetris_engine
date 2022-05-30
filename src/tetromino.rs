@@ -1,18 +1,12 @@
-
-
-// Useful:
-// https://www.youtube.com/watch?v=8OK8_tHeCIA
-
-/*
-Every tetromino will be made from a 4x4 grid
- */
-
 use std::cmp::{max, min};
 
 pub const TETROMINO_WIDTH: usize = 4;
 pub const TETROMINO_HEIGHT: usize = 4;
 
 
+/// Every Tetromino will be made from a 4x4 grid
+/// Resources:
+///     * https://www.youtube.com/watch?v=8OK8_tHeCIA
 pub struct Tetromino {
     pub area: [[i32; TETROMINO_WIDTH]; TETROMINO_HEIGHT],
     pub x: usize,
@@ -58,9 +52,7 @@ impl Default for Tetromino {
     }
 }
 
-/*
-Rotate 90 degrees clockwise
- */
+/// Rotate 90 degrees clockwise
 fn rotate(t: &mut Tetromino) -> () {
     let n = t.area.len();
     let m = t.area[0].len();
@@ -80,10 +72,8 @@ fn rotate(t: &mut Tetromino) -> () {
     }
 }
 
-/*
-Rotate 90 degrees clockwise alternative implementation,
-same concept
- */
+/// Rotate 90 degrees clockwise alternative implementation,
+/// same concept
 fn rotate_alt(t: &mut Tetromino) -> () {
     let n = t.area.len();
     let m = t.area[0].len();
@@ -255,10 +245,10 @@ mod tests {
         t.rotate();
         expected_result =
             [
+                [0,0,0,0],
                 [0,0,1,1],
                 [0,0,0,1],
-                [0,0,0,1],
-                [0,0,0,0]
+                [0,0,0,1]
             ];
         assert_eq!(t.area, expected_result);
     }
