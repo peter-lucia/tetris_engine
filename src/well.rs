@@ -23,6 +23,9 @@ use crate::tetromino;
 use std::error::Error;
 use std::cmp::{min, max};
 
+pub const WELL_WIDTH: usize = 14;
+pub const WELL_HEIGHT: usize = 20;
+
 pub struct Well {
     grid: [[i32; WELL_WIDTH]; WELL_HEIGHT],
     stdout: Stdout,
@@ -45,9 +48,6 @@ pub fn random_direction() -> Direction {
         _ => Direction::Right,
     }
 }
-
-const WELL_WIDTH: usize = 14;
-const WELL_HEIGHT: usize = 20;
 
 pub trait BoardCommandLine {
     /*
@@ -75,7 +75,7 @@ impl BoardCommandLine for Well {
             current_tetromino: Tetromino::make_l(),
         };
         // paint the outline of the board
-        let mut output = "█".black();
+        let mut output = " ".black();
         for i in 0..WELL_HEIGHT{
             for j in 0..WELL_WIDTH {
                 if i == 0 || i == WELL_HEIGHT - 1 {
@@ -86,7 +86,7 @@ impl BoardCommandLine for Well {
                     output = "█".white();
                     result.grid[i][j] = 1;
                 } else {
-                    output = "█".black();
+                    output = " ".black();
                     result.grid[i][j] = 0;
                 }
                 result.stdout.queue(cursor::MoveTo(i as u16, j as u16));
@@ -130,29 +130,29 @@ impl BoardCommandLine for Well {
                             // exit
                             return Ok(());
                         }
-                        else if event.code == KeyCode::Left {
+                        else if event.code == KeyCode::Left || event.code == KeyCode::Char('h') {
                             self.move_tetromino(Direction::Left);
                         }
-                        else if event.code == KeyCode::Right {
+                        else if event.code == KeyCode::Right || event.code == KeyCode::Char('l') {
                             self.move_tetromino(Direction::Right);
                         }
-                        else if event.code == KeyCode::Down {
+                        else if event.code == KeyCode::Down || event.code == KeyCode::Char('j') {
                             self.move_tetromino(Direction::Down);
                         }
-                        else if event.code == KeyCode::Up {
+                        else if event.code == KeyCode::Up || event.code == KeyCode::Char('k') {
                             self.move_tetromino(Direction::Up);
                         }
                         else if event.code == KeyCode::Char('r') {
-                            self.render( "█".black());
+                            self.render( " ".black());
                             self.current_tetromino.rotate();
                             self.render( "█".white());
                         }
                     },
                     Event::Mouse(event) => {
-                        println!("{:?}", event)
+                        log::info!("{:?}", event);
                     },
                     Event::Resize(width, height) => {
-                        println!("New size {}x{}", width, height)
+                        log::info!("New size {}x{}", width, height);
                     },
                 }
             }
@@ -165,29 +165,27 @@ impl BoardCommandLine for Well {
         self.render( "█".black());
         let (min_x, max_x, min_y, max_y) = self.current_tetromino
             .get_xy_min_max();
+        println!("{},{}", self.current_tetromino.x, self.current_tetromino.y);
         match direction {
             Direction::Left => {
-                if min_y > 1 {
+                if !self.current_tetromino.will_collide(self.grid, 0, -1) {
                     self.current_tetromino.y -= 1;
                 }
             }
             Direction::Right => {
-                ///  - - - - |
-                ///  x x x x |
-                ///  - - - - |
-                if max_y < WELL_WIDTH + 3 {
+                if !self.current_tetromino.will_collide(self.grid, 0, 1) {
                     self.current_tetromino.y += 1;
                 }
 
             }
             Direction::Down => {
-                if max_x < WELL_HEIGHT - 7 {
+                if !self.current_tetromino.will_collide(self.grid, 1, 0) {
                     self.current_tetromino.x += 1
                 }
 
             }
             Direction::Up => {
-                if min_x > 1 {
+                if !self.current_tetromino.will_collide(self.grid, -1, 0) {
                     self.current_tetromino.x -= 1
                 }
             }

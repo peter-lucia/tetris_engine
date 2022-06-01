@@ -1,29 +1,34 @@
 use std::cmp::{max, min};
+use crate::well::{WELL_WIDTH, WELL_HEIGHT};
 
 pub const TETROMINO_WIDTH: usize = 4;
 pub const TETROMINO_HEIGHT: usize = 4;
 
 
-/// Every Tetromino will be made from a 4x4 grid
-/// Resources:
+/// ## Arguments
+///     * area The grid (e.g. 4x4) in which the tetromino will be drawn
+///     * x (height) position in the well coordinate plane
+///     * y (width) position in the well coordinate plane
+/// ## Resources
 ///     * https://www.youtube.com/watch?v=8OK8_tHeCIA
 pub struct Tetromino {
     pub area: [[i32; TETROMINO_WIDTH]; TETROMINO_HEIGHT],
-    pub x: usize,  /// x (height) position in the well coordinate plane
-    pub y: usize,  /// y (width) position in the well coordinate plane
+    pub x: usize,
+    pub y: usize,
 }
 
 impl Tetromino {
     pub fn rotate(&mut self) -> () {
         rotate(self);
+        self.move_to_top_left();
     }
 
     /// Gets (min_x, max_x, min_y, max_y) the current tetromino piece fills
     /// in the current well coordinate plane
-    pub fn get_xy_min_max(&self) -> (usize, usize, usize, usize) {
-        let mut min_x: usize = 0;
+    pub fn get_xy_min_max(&mut self) -> (usize, usize, usize, usize) {
+        let mut min_x: usize = TETROMINO_HEIGHT;
         let mut max_x: usize = 0;
-        let mut min_y: usize = 0;
+        let mut min_y: usize = TETROMINO_WIDTH;
         let mut max_y: usize = 0;
         for i in 0..TETROMINO_HEIGHT {
             for j in 0..TETROMINO_WIDTH {
@@ -35,7 +40,66 @@ impl Tetromino {
                 }
             }
         }
-        return (self.x + min_x, self.x + max_x, self.y + min_y, self.y + max_y);
+        return (min_x, max_x, min_y, max_y);
+    }
+
+    pub fn will_collide(&self, grid: [[i32; WELL_WIDTH]; WELL_HEIGHT], dx: i32, dy: i32) -> bool {
+        todo!("Implement this.");
+        return true;
+    }
+
+    fn move_to_top_left(&mut self) {
+        while self.is_row_empty(0) {
+            self.shift_up();
+        }
+        while self.is_column_empty(0) {
+            self.shift_left();
+        }
+    }
+
+    fn is_row_empty(&self, i: usize) -> bool {
+        assert!(i < TETROMINO_HEIGHT);
+        for j in 0..TETROMINO_WIDTH {
+            if self.area[i][j] != 0 {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    fn is_column_empty(&self, j: usize) -> bool {
+        assert!(j < TETROMINO_WIDTH);
+        for i in 0..TETROMINO_HEIGHT {
+            if self.area[i][j] != 0 {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    fn shift_up(&mut self) {
+        for i in 0..TETROMINO_HEIGHT {
+            for j in 0..TETROMINO_WIDTH {
+                if i < TETROMINO_HEIGHT - 1 {
+                    self.area[i][j] = self.area[i + 1][j];
+                } else {
+                    self.area[i][j] = 0;
+                }
+            }
+        }
+    }
+
+    fn shift_left(&mut self) {
+        for i in 0..TETROMINO_HEIGHT {
+            for j in 0..TETROMINO_WIDTH {
+                if j < TETROMINO_WIDTH - 1 {
+                    self.area[i][j] = self.area[i][j+1];
+                } else {
+                    self.area[i][j] = 0;
+                }
+            }
+        }
+
     }
 }
 
@@ -231,13 +295,15 @@ mod tests {
     }
 
     #[test]
-    fn test_rotate_90_tetromino() -> () {
+    fn test_rotate_90_offset() -> () {
         let mut t = Tetromino::make_l();
+        t.x = 0;
+        t.y = 0;
         t.rotate();
         let mut expected_result =
             [
-                [0,1,1,1],
-                [0,1,0,0],
+                [1,1,1,0],
+                [1,0,0,0],
                 [0,0,0,0],
                 [0,0,0,0]
             ];
@@ -245,12 +311,25 @@ mod tests {
         t.rotate();
         expected_result =
             [
-                [0,0,0,0],
-                [0,0,1,1],
-                [0,0,0,1],
-                [0,0,0,1]
+                [1,1,0,0],
+                [0,1,0,0],
+                [0,1,0,0],
+                [0,0,0,0]
             ];
         assert_eq!(t.area, expected_result);
+        assert_eq!(t.x, 0);
+        assert_eq!(t.y, 0);
+        t.rotate();
+        expected_result =
+            [
+                [0,0,1,0],
+                [1,1,1,0],
+                [0,0,0,0],
+                [0,0,0,0]
+            ];
+        assert_eq!(t.area, expected_result);
+        assert_eq!(t.x, 0);
+        assert_eq!(t.y, 0);
     }
 
     #[test]
@@ -268,5 +347,46 @@ mod tests {
              [15,11,7,3],
              [16,12,8,4]];
         assert_eq!(t.area, expected_result);
+    }
+
+    #[test]
+    fn test_min_max_xy() {
+        let mut t = Tetromino::make_l();
+        t.x = 0;
+        t.y = 0;
+        t.area =
+            [
+                [0, 1, 1, 1],
+                [0, 1, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0]
+            ];
+
+        let (min_x, max_x, min_y, max_y) = t.get_xy_min_max();
+
+        assert_eq!(min_x, 0);
+        assert_eq!(min_y, 1);
+        assert_eq!(max_x, 1);
+        assert_eq!(max_y, 3);
+    }
+
+    #[test]
+    fn test_min_max_xy_2() {
+        let mut t = Tetromino::make_l();
+        t.x = 0;
+        t.y = 0;
+        t.area =
+            [
+                [0,0,1,0],
+                [0,1,1,0],
+                [0,1,0,0],
+                [0,0,0,0]
+            ];
+        let (min_x, max_x, min_y, max_y) = t.get_xy_min_max();
+
+        assert_eq!(min_x, 0);
+        assert_eq!(min_y, 1);
+        assert_eq!(max_x, 2);
+        assert_eq!(max_y, 2);
     }
 }
