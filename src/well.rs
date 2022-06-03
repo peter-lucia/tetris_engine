@@ -54,7 +54,7 @@ pub trait BoardCommandLine {
     pub is implied in traits
      */
     fn new() -> Self;
-    fn render(&mut self, output_color: StyledContent<&str>) -> ();
+    fn render(&mut self, erase: bool) -> ();
     fn run(&mut self) -> crossterm::Result<()>;
     fn move_tetromino(&mut self, direction: Direction) -> ();
     fn stick_tetromino(&mut self) -> ();
@@ -66,6 +66,7 @@ impl BoardCommandLine for Well {
     /// Creates a new well for command line
     fn new() -> Well {
         let mut stdout = stdout();
+        stdout.queue(cursor::Hide);
         stdout.execute(terminal::Clear(terminal::ClearType::All));
         let mut result = Well {
             // |<---------- 12 --------->| plus 2 chars to display edge of wells = 14 x 20
@@ -98,21 +99,31 @@ impl BoardCommandLine for Well {
     }
 
     /// Render the tetromino 4x4 grid onto the tetris well
-    fn render(&mut self, output_color: StyledContent<&str>) -> () {
+    /// Only the grid's walls and stuck tetrominos are marked as 1
+    /// empty spaces, including the current tetromino, are left as 0 on the grid
+    /// until they are stuck
+    fn render(&mut self, erase: bool) -> () {
 
-        let x_min = max(self.current_tetromino.y, 0);
-        let x_max = min(self.current_tetromino.y + TETROMINO_HEIGHT, WELL_HEIGHT);
-        let y_min = max(self.current_tetromino.x, 0);
-        let y_max = min(self.current_tetromino.x + TETROMINO_WIDTH, WELL_WIDTH);
+        let x_min = self.current_tetromino.y;
+        let x_max = self.current_tetromino.y + TETROMINO_HEIGHT;
+        let y_min = self.current_tetromino.x;
+        let y_max = self.current_tetromino.x + TETROMINO_WIDTH;
         for i in x_min..x_max {
             for j in y_min..y_max {
                 let ii = max(0, i - self.current_tetromino.y);
                 let jj = max(0, j - self.current_tetromino.x);
-                if self.current_tetromino.area[ii][jj] == 1 && self.grid[i][j] != 1 {
+                if !erase && self.current_tetromino.area[ii][jj] == 1 {
+                    // self.grid[i][j] = 1;
                     self.stdout.queue(cursor::MoveTo(i as u16, j as u16));
-                    self.stdout.queue(style::PrintStyledContent(output_color));
-                    self.stdout.flush();
+                    self.stdout.queue(style::PrintStyledContent("█".white()));
+                } else {
+                    // self.grid[i][j] = 0;
+                    if i > 0 && i < WELL_HEIGHT - 1 && j > 0 && j < WELL_WIDTH - 1 {
+                        self.stdout.queue(cursor::MoveTo(i as u16, j as u16));
+                        self.stdout.queue(style::PrintStyledContent(" ".white()));
+                    }
                 }
+                self.stdout.flush();
             }
         }
     }
@@ -121,7 +132,6 @@ impl BoardCommandLine for Well {
     /// finished epoch.
     fn run(&mut self) -> crossterm::Result<()> {
         loop {
-            self.render( "█".white());
             if poll(Duration::from_millis(5))? {
                 match read().unwrap() {
                     Event::Key(event) => {
@@ -143,9 +153,15 @@ impl BoardCommandLine for Well {
                             self.move_tetromino(Direction::Up);
                         }
                         else if event.code == KeyCode::Char('r') {
-                            self.render( " ".black());
-                            self.current_tetromino.rotate();
-                            self.render( "█".white());
+                            self.render(true);
+                            self.current_tetromino.rotate(false);
+                            self.render(false);
+                            // if there's already a collision, undo the rotation
+                            if self.current_tetromino.will_collide(self.grid, 0, 0) {
+                                self.render(true);
+                                self.current_tetromino.rotate(true);
+                                self.render(false);
+                            }
                         }
                     },
                     Event::Mouse(event) => {
@@ -156,16 +172,11 @@ impl BoardCommandLine for Well {
                     },
                 }
             }
-            //
-            // self.move_tetromino(Direction::Down);
         }
     }
 
     fn move_tetromino(&mut self, direction: Direction) -> () {
-        self.render( "█".black());
-        let (min_x, max_x, min_y, max_y) = self.current_tetromino
-            .get_xy_min_max();
-        println!("{},{}", self.current_tetromino.x, self.current_tetromino.y);
+        self.render(true);
         match direction {
             Direction::Left => {
                 if !self.current_tetromino.will_collide(self.grid, 0, -1) {
@@ -176,21 +187,20 @@ impl BoardCommandLine for Well {
                 if !self.current_tetromino.will_collide(self.grid, 0, 1) {
                     self.current_tetromino.y += 1;
                 }
-
             }
             Direction::Down => {
                 if !self.current_tetromino.will_collide(self.grid, 1, 0) {
-                    self.current_tetromino.x += 1
+                    self.current_tetromino.x += 1;
                 }
-
             }
             Direction::Up => {
                 if !self.current_tetromino.will_collide(self.grid, -1, 0) {
-                    self.current_tetromino.x -= 1
+                    self.current_tetromino.x -= 1;
                 }
             }
         }
-        self.render( "█".white());
+        self.render(false);
+        log::info!("Current position ({},{})", self.current_tetromino.x, self.current_tetromino.y);
     }
 
     fn stick_tetromino(&mut self) -> () {

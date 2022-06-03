@@ -18,7 +18,13 @@ pub struct Tetromino {
 }
 
 impl Tetromino {
-    pub fn rotate(&mut self) -> () {
+    pub fn rotate(&mut self, reverse: bool) -> () {
+        if reverse {
+            for _ in 0..3 {
+                rotate(self);
+            }
+            return;
+        }
         rotate(self);
         self.move_to_top_left();
     }
@@ -43,9 +49,35 @@ impl Tetromino {
         return (min_x, max_x, min_y, max_y);
     }
 
-    pub fn will_collide(&self, grid: [[i32; WELL_WIDTH]; WELL_HEIGHT], dx: i32, dy: i32) -> bool {
-        todo!("Implement this.");
-        return true;
+    /// Iterate over each point in the tetromino grid that is active
+    /// if that point is active, add dx and dy to it, then check if the new position lands
+    /// in a spot in the grid that is already active
+    pub fn will_collide(&mut self, grid: [[i32; WELL_WIDTH]; WELL_HEIGHT], dx: i32, dy: i32) -> bool {
+        for i in 0..TETROMINO_HEIGHT {
+            for j in 0..TETROMINO_WIDTH {
+                if self.area[i][j] == 1 {
+                    let row: i32 = self.x as i32 + i as i32 + dx;
+                    let col: i32 = self.y as i32 + j as i32 + dy;
+                    // only the grid's walls and stuck tetrominos are marked as 1
+                    // empty spaces, including the current tetromino, are left as 0
+                    if grid[row as usize][col as usize] == 1 {
+                        log::info!("({},{}) will collide \
+                        (self.x,i,dx) = ({},{},{}) \
+                        (self.y,j,dy) = ({},{},{})",
+                                   row,
+                                   col,
+                        self.x,
+                        i,
+                        dx,
+                        self.y,
+                        j,
+                        dy);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     fn move_to_top_left(&mut self) {
@@ -110,8 +142,8 @@ impl Default for Tetromino {
             [0,0,1,0],
             [0,0,1,0],
             [0,0,1,0]],
-            x: 0,
-            y: 6,
+            x: 1, // must start inside the well
+            y: 6, // starts in the middle of the well, this could be random
         }
     }
 }
