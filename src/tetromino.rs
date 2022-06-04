@@ -52,27 +52,23 @@ impl Tetromino {
     /// Iterate over each point in the tetromino grid that is active
     /// if that point is active, add dx and dy to it, then check if the new position lands
     /// in a spot in the grid that is already active
+    /// only the grid's walls and stuck tetrominos are marked as 1
+    /// empty spaces, including the current tetromino, are left as 0
     pub fn will_collide(&mut self, grid: [[i32; WELL_WIDTH]; WELL_HEIGHT], dx: i32, dy: i32) -> bool {
-        for i in 0..TETROMINO_HEIGHT {
-            for j in 0..TETROMINO_WIDTH {
-                if self.area[i][j] == 1 {
-                    let row: i32 = self.x as i32 + i as i32 + dx;
-                    let col: i32 = self.y as i32 + j as i32 + dy;
-                    // only the grid's walls and stuck tetrominos are marked as 1
-                    // empty spaces, including the current tetromino, are left as 0
-                    if grid[row as usize][col as usize] == 1 {
-                        log::info!("({},{}) will collide \
-                        (self.x,i,dx) = ({},{},{}) \
-                        (self.y,j,dy) = ({},{},{})",
-                                   row,
-                                   col,
-                        self.x,
-                        i,
-                        dx,
-                        self.y,
-                        j,
-                        dy);
+        log::info!("Tetromino: ");
+        for x in 0..self.area.len() {
+            log::info!("{:?}", self.area[x]);
+        }
+        for _y in 0..TETROMINO_HEIGHT {
+            for _x in 0..TETROMINO_WIDTH {
+                if self.area[_y][_x] == 1 {
+                    let xx: i32 = self.x as i32 + _x as i32 + dx;
+                    let yy: i32 = self.y as i32 + _y as i32 + dy;
+                    if grid[xx as usize][yy as usize] == 1 {
+                        log::info!("({},{}) will collide", xx, yy);
                         return true;
+                    } else {
+                        log::info!("({},{}) will not collide", xx, yy);
                     }
                 }
             }
@@ -142,8 +138,8 @@ impl Default for Tetromino {
             [0,0,1,0],
             [0,0,1,0],
             [0,0,1,0]],
-            x: 1, // must start inside the well
-            y: 6, // starts in the middle of the well, this could be random
+            x: 6, // must start inside the well
+            y: 1, // starts in the middle of the well, this could be random
         }
     }
 }

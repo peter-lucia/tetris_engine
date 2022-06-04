@@ -77,20 +77,20 @@ impl BoardCommandLine for Well {
         };
         // paint the outline of the board
         let mut output = " ".black();
-        for i in 0..WELL_HEIGHT{
-            for j in 0..WELL_WIDTH {
-                if i == 0 || i == WELL_HEIGHT - 1 {
+        for x in 0..WELL_WIDTH {
+            for y in 0..WELL_HEIGHT{
+                if y == 0 || y == WELL_HEIGHT - 1 {
                     output = "█".white();
-                    result.grid[i][j] = 1;
+                    result.grid[y][x] = 1;
                 }
-                else if j == 0 || j == WELL_WIDTH - 1 {
+                else if x == 0 || x == WELL_WIDTH - 1 {
                     output = "█".white();
-                    result.grid[i][j] = 1;
+                    result.grid[y][x] = 1;
                 } else {
                     output = " ".black();
-                    result.grid[i][j] = 0;
+                    result.grid[y][x] = 0;
                 }
-                result.stdout.queue(cursor::MoveTo(i as u16, j as u16));
+                result.stdout.queue(cursor::MoveTo(x as u16, y as u16)); // must be reversed
                 result.stdout.queue(style::PrintStyledContent(output));
                 result.stdout.flush();
             }
@@ -102,24 +102,26 @@ impl BoardCommandLine for Well {
     /// Only the grid's walls and stuck tetrominos are marked as 1
     /// empty spaces, including the current tetromino, are left as 0 on the grid
     /// until they are stuck
+    /// 2 on grid means tetrominomo is not stuck
+    /// 1 on grid corresponds with a border or a stuck tetromino
     fn render(&mut self, erase: bool) -> () {
 
-        let x_min = self.current_tetromino.y;
-        let x_max = self.current_tetromino.y + TETROMINO_HEIGHT;
-        let y_min = self.current_tetromino.x;
-        let y_max = self.current_tetromino.x + TETROMINO_WIDTH;
-        for i in x_min..x_max {
-            for j in y_min..y_max {
-                let ii = max(0, i - self.current_tetromino.y);
-                let jj = max(0, j - self.current_tetromino.x);
-                if !erase && self.current_tetromino.area[ii][jj] == 1 {
-                    // self.grid[i][j] = 1;
-                    self.stdout.queue(cursor::MoveTo(i as u16, j as u16));
+        let x_min = self.current_tetromino.x;
+        let x_max = self.current_tetromino.x + TETROMINO_WIDTH;
+        let y_min = self.current_tetromino.y;
+        let y_max = self.current_tetromino.y + TETROMINO_HEIGHT;
+        for x in x_min..x_max {
+            for y in y_min..y_max {
+                let yy = max(0, y - self.current_tetromino.y);
+                let xx = max(0, x - self.current_tetromino.x);
+                if !erase && self.current_tetromino.area[yy][xx] == 1 {
+                    self.grid[y][x] = 2;
+                    self.stdout.queue(cursor::MoveTo(x as u16, y as u16));
                     self.stdout.queue(style::PrintStyledContent("█".white()));
                 } else {
-                    // self.grid[i][j] = 0;
-                    if i > 0 && i < WELL_HEIGHT - 1 && j > 0 && j < WELL_WIDTH - 1 {
-                        self.stdout.queue(cursor::MoveTo(i as u16, j as u16));
+                    if y > 0 && y < WELL_HEIGHT - 1 && x > 0 && x < WELL_WIDTH - 1 {
+                        self.grid[y][x] = 0;
+                        self.stdout.queue(cursor::MoveTo(x as u16, y as u16)); // must be reversed
                         self.stdout.queue(style::PrintStyledContent(" ".white()));
                     }
                 }
@@ -179,28 +181,32 @@ impl BoardCommandLine for Well {
         self.render(true);
         match direction {
             Direction::Left => {
-                if !self.current_tetromino.will_collide(self.grid, 0, -1) {
-                    self.current_tetromino.y -= 1;
+                if !self.current_tetromino.will_collide(self.grid, -1, 0) {
+                    self.current_tetromino.x -= 1;
                 }
             }
             Direction::Right => {
-                if !self.current_tetromino.will_collide(self.grid, 0, 1) {
-                    self.current_tetromino.y += 1;
-                }
-            }
-            Direction::Down => {
                 if !self.current_tetromino.will_collide(self.grid, 1, 0) {
                     self.current_tetromino.x += 1;
                 }
             }
+            Direction::Down => {
+                if !self.current_tetromino.will_collide(self.grid, 0, 1) {
+                    self.current_tetromino.y += 1;
+                }
+            }
             Direction::Up => {
-                if !self.current_tetromino.will_collide(self.grid, -1, 0) {
-                    self.current_tetromino.x -= 1;
+                if !self.current_tetromino.will_collide(self.grid, 0, -1) {
+                    self.current_tetromino.y -= 1;
                 }
             }
         }
         self.render(false);
         log::info!("Current position ({},{})", self.current_tetromino.x, self.current_tetromino.y);
+        log::info!("Grid: ");
+        for x in 0..self.grid.len() {
+            log::info!("{:?}", self.grid[x]);
+        }
     }
 
     fn stick_tetromino(&mut self) -> () {
