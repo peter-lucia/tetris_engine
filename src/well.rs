@@ -22,6 +22,7 @@ use crossterm::event::{poll, read, Event};
 use crate::tetromino;
 use std::error::Error;
 use std::cmp::{min, max};
+use std::time::Instant;
 
 pub const WELL_WIDTH: usize = 14;
 pub const WELL_HEIGHT: usize = 20;
@@ -134,7 +135,17 @@ impl BoardCommandLine for Well {
     /// Gradually increases the refresh rate, moving, the tetromino down a block faster with each
     /// finished epoch.
     fn run(&mut self) -> crossterm::Result<()> {
+        let mut last_instant = Instant::now();
         loop {
+            let current_instant= Instant::now();
+            if current_instant.duration_since(last_instant) > Duration::from_secs(1) {
+                last_instant = current_instant;
+                if !self.current_tetromino.will_collide(self.grid, 0, 1) {
+                    self.render(true);
+                    self.current_tetromino.y += 1;
+                    self.render(false);
+                }
+            }
             if poll(Duration::from_millis(5))? {
                 match read().unwrap() {
                     Event::Key(event) => {
@@ -199,9 +210,9 @@ impl BoardCommandLine for Well {
                 }
             }
             Direction::Up => {
-                if !self.current_tetromino.will_collide(self.grid, 0, -1) {
-                    self.current_tetromino.y -= 1;
-                }
+                // if !self.current_tetromino.will_collide(self.grid, 0, -1) {
+                //     self.current_tetromino.y -= 1;
+                // }
             }
         }
         self.render(false);
