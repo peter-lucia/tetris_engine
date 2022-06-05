@@ -23,9 +23,9 @@ impl Tetromino {
             for _ in 0..3 {
                 rotate(self);
             }
-            return;
+        } else {
+            rotate(self);
         }
-        rotate(self);
         self.move_to_top_left();
     }
 
