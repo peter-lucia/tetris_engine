@@ -58,6 +58,7 @@ pub trait BoardCommandLine {
     fn run(&mut self) -> crossterm::Result<()>;
     fn move_tetromino(&mut self, direction: Direction) -> ();
     fn stick_tetromino(&mut self) -> ();
+    fn log_grid(&self) -> ();
     fn quit(&mut self) -> ();
 }
 
@@ -203,6 +204,10 @@ impl BoardCommandLine for Well {
         }
         self.render(false);
         log::info!("Current position ({},{})", self.current_tetromino.x, self.current_tetromino.y);
+        self.log_grid();
+    }
+
+    fn log_grid(&self) -> () {
         log::info!("Grid: ");
         for x in 0..self.grid.len() {
             log::info!("{:?}", self.grid[x]);
