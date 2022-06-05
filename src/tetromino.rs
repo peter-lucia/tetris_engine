@@ -144,8 +144,8 @@ impl Default for Tetromino {
             [0,0,1,0],
             [0,0,1,0],
             [0,0,1,0]],
-            x: 6, // must start inside the well
-            y: 1, // starts in the middle of the well, this could be random
+            x: WELL_WIDTH / 2, // horizontal starting position
+            y: 1, // height
         }
     }
 }

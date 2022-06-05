@@ -157,14 +157,16 @@ impl BoardCommandLine for Well {
                         }
                         else if event.code == KeyCode::Char('r') {
                             self.render(true);
-                            self.current_tetromino.rotate(false);
-                            self.render(false);
-                            // if there's already a collision, undo the rotation
-                            if self.current_tetromino.will_collide(self.grid, 0, 0) {
-                                self.render(true);
-                                self.current_tetromino.rotate(true);
-                                self.render(false);
+                            let mut i = 0;
+                            loop {
+                                self.current_tetromino.rotate(false);
+                                if (!self.current_tetromino
+                                    .will_collide(self.grid, 0, 0)) || i == 4 {
+                                    break;
+                                }
+                                i += 1;
                             }
+                            self.render(false);
                         }
                     },
                     Event::Mouse(event) => {
