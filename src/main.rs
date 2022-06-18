@@ -1,6 +1,5 @@
 mod tetromino;
 mod well;
-mod app;
 
 use std::io::{stdout, Write};
 use crossterm::{
@@ -12,9 +11,6 @@ use crossterm::{
 };
 use well::{Well, BoardCommandLine};
 use std::{io, thread, error::Error};
-use app::{
-    App,
-};
 use log::LevelFilter;
 use log4rs::append::file::FileAppender;
 use log4rs::encode::pattern::PatternEncoder;
