@@ -143,11 +143,7 @@ impl BoardCommandLine for Well {
             let current_instant= Instant::now();
             if current_instant.duration_since(last_instant) > Duration::from_secs(1) {
                 last_instant = current_instant;
-                if !self.current_tetromino.will_collide(self.grid, 0, 1) {
-                    self.render(true);
-                    self.current_tetromino.y += 1;
-                    self.render(false);
-                }
+                self.move_tetromino(Direction::Down);
             }
             if poll(Duration::from_millis(5))? {
                 match read().unwrap() {
@@ -224,6 +220,20 @@ impl BoardCommandLine for Well {
             self.current_tetromino.stick_to_grid(&mut self.grid);
             log::info!("Current tetromino is stuck!");
             self.current_tetromino = Tetromino::make_straight();
+        }
+        // check if any row is full, if so, clear it
+        for x in 1..self.grid.len()-1 {
+            if self.grid[x] == [1; WELL_WIDTH] {
+                log::info!("Clearing row {}", x);
+                self.grid[x] = [0; WELL_WIDTH];
+                self.grid[x][0] = 1;
+                self.grid[x][WELL_WIDTH-1] = 1;
+                for y in 1..self.grid[x].len()-1 {
+                    self.stdout.queue(cursor::MoveTo(y as u16, x as u16)); // must be reversed
+                    self.stdout.queue(style::PrintStyledContent(" ".black()));
+                }
+                self.stdout.flush();
+            }
         }
     }
 

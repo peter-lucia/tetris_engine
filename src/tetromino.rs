@@ -31,6 +31,7 @@ impl Tetromino {
 
     /// Gets (min_x, max_x, min_y, max_y) the current tetromino piece fills
     /// in the current well coordinate plane
+    /// May want to deprecate this
     pub fn get_xy_min_max(&mut self) -> (usize, usize, usize, usize) {
         let mut min_x: usize = TETROMINO_HEIGHT;
         let mut max_x: usize = 0;
