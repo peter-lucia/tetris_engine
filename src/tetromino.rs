@@ -82,6 +82,24 @@ impl Tetromino {
         return false;
     }
 
+    /// Returns true if the tetromino is stuck in the grid or false if it can still move
+    pub fn is_stuck(&mut self, grid: [[i32; WELL_WIDTH]; WELL_HEIGHT]) -> bool {
+        return self.will_collide(grid, 0, 1);
+    }
+
+    /// Sticks the tetromino to the grid
+    pub fn stick_to_grid(&mut self, grid: &mut [[i32; WELL_WIDTH]; WELL_HEIGHT]) -> () {
+        for _y in 0..TETROMINO_HEIGHT {
+            for _x in 0..TETROMINO_WIDTH {
+                if self.area[_y][_x] == 1 {
+                    let xx: i32 = self.x as i32 + _x as i32;
+                    let yy: i32 = self.y as i32 + _y as i32;
+                    grid[yy as usize][xx as usize] = 1;
+                }
+            }
+        }
+    }
+
     fn move_to_top_left(&mut self) {
         while self.is_row_empty(0) {
             self.shift_up();
@@ -140,10 +158,10 @@ impl Tetromino {
 impl Default for Tetromino {
     fn default() -> Tetromino {
         Tetromino {
-            area: [[0,0,1,0],
-            [0,0,1,0],
-            [0,0,1,0],
-            [0,0,1,0]],
+            area: [[1,0,0,0],
+                   [1,0,0,0],
+                   [1,0,0,0],
+                   [1,0,0,0]],
             x: WELL_WIDTH / 2, // horizontal starting position
             y: 1, // height
         }
@@ -207,10 +225,10 @@ impl TetrominoStraight for Tetromino {
     fn make_straight() -> Tetromino {
         return Tetromino {
             area:
-            [[0,0,1,0],
-             [0,0,1,0],
-             [0,0,1,0],
-             [0,0,1,0]],
+            [[1,0,0,0],
+             [1,0,0,0],
+             [1,0,0,0],
+             [1,0,0,0]],
             ..Default::default()
         }
     }
@@ -224,10 +242,10 @@ pub trait TetrominoSquare {
 impl TetrominoSquare for Tetromino {
     fn make_square() -> Self {
         return Tetromino {
-            area: [[0,0,0,0],
-                  [0,1,1,0],
-                  [0,1,1,0],
-                  [0,0,0,0]],
+            area: [[1,1,0,0],
+                   [1,1,0,0],
+                   [0,0,0,0],
+                   [0,0,0,0]],
             ..Default::default()
         }
     }
@@ -241,9 +259,9 @@ impl TetrominoT for Tetromino {
     fn make_t() -> Self {
         return Tetromino {
             area:
-            [[0,0,0,0],
-             [1,1,1,0],
+            [[1,1,1,0],
              [0,1,0,0],
+             [0,0,0,0],
              [0,0,0,0]],
             ..Default::default()
         }
@@ -298,7 +316,7 @@ mod tests {
              [1,1,0,0],
              [1,1,0,0],
         ];
-        t.rotate();
+        t.rotate(false);
         let mut expected_result =
             [[1,1,1,1],
              [1,1,0,0],
@@ -317,7 +335,7 @@ mod tests {
                 [1,1,0,0],
                 [1,1,0,0],
             ];
-        t.rotate();
+        t.rotate(false);
         let mut expected_result =
             [
                 [1,1,1,1],
@@ -333,7 +351,7 @@ mod tests {
         let mut t = Tetromino::make_l();
         t.x = 0;
         t.y = 0;
-        t.rotate();
+        t.rotate(false);
         let mut expected_result =
             [
                 [1,1,1,0],
@@ -342,7 +360,7 @@ mod tests {
                 [0,0,0,0]
             ];
         assert_eq!(t.area, expected_result);
-        t.rotate();
+        t.rotate(false);
         expected_result =
             [
                 [1,1,0,0],
@@ -353,7 +371,7 @@ mod tests {
         assert_eq!(t.area, expected_result);
         assert_eq!(t.x, 0);
         assert_eq!(t.y, 0);
-        t.rotate();
+        t.rotate(false);
         expected_result =
             [
                 [0,0,1,0],
@@ -374,7 +392,7 @@ mod tests {
              [5,6,7,8],
              [9,10,11,12],
              [13,14,15,16]];
-        t.rotate();
+        t.rotate(false);
         let mut expected_result =
             [[13,9,5,1],
              [14,10,6,2],

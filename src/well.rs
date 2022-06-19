@@ -23,6 +23,7 @@ use crate::tetromino;
 use std::error::Error;
 use std::cmp::{min, max};
 use std::time::Instant;
+use std::borrow::BorrowMut;
 
 pub const WELL_WIDTH: usize = 14;
 pub const WELL_HEIGHT: usize = 20;
@@ -58,10 +59,10 @@ pub trait BoardCommandLine {
     fn render(&mut self, erase: bool) -> ();
     fn run(&mut self) -> crossterm::Result<()>;
     fn move_tetromino(&mut self, direction: Direction) -> ();
-    fn stick_tetromino(&mut self) -> ();
     fn log_grid(&self) -> ();
     fn quit(&mut self) -> ();
 }
+
 
 impl BoardCommandLine for Well {
 
@@ -73,7 +74,7 @@ impl BoardCommandLine for Well {
         let mut result = Well {
             // |<---------- 12 --------->| plus 2 chars to display edge of wells = 14 x 20
             // where the well is of height 18 with two lines for the top (if needed) and bottom
-            grid: [[0; WELL_WIDTH] ; WELL_HEIGHT],
+            grid: [[0; WELL_WIDTH]; WELL_HEIGHT],
             stdout: stdout,
             current_tetromino: Tetromino::make_l(),
         };
@@ -121,7 +122,8 @@ impl BoardCommandLine for Well {
                     self.stdout.queue(cursor::MoveTo(x as u16, y as u16));
                     self.stdout.queue(style::PrintStyledContent("█".white()));
                 } else {
-                    if y > 0 && y < WELL_HEIGHT - 1 && x > 0 && x < WELL_WIDTH - 1 {
+                    if y > 0 && y < WELL_HEIGHT - 1 && x > 0 && x < WELL_WIDTH - 1
+                        && self.grid[y][x] == 2 {
                         self.grid[y][x] = 0;
                         self.stdout.queue(cursor::MoveTo(x as u16, y as u16)); // must be reversed
                         self.stdout.queue(style::PrintStyledContent(" ".white()));
@@ -130,9 +132,10 @@ impl BoardCommandLine for Well {
                 self.stdout.flush();
             }
         }
+        self.log_grid();
     }
 
-    /// Gradually increases the refresh rate, moving, the tetromino down a block faster with each
+    /// Gradually increases the refresh rate, moving the tetromino down a block faster with each
     /// finished epoch.
     fn run(&mut self) -> crossterm::Result<()> {
         let mut last_instant = Instant::now();
@@ -217,7 +220,11 @@ impl BoardCommandLine for Well {
         }
         self.render(false);
         log::info!("Current position ({},{})", self.current_tetromino.x, self.current_tetromino.y);
-        self.log_grid();
+        if self.current_tetromino.is_stuck(self.grid) {
+            self.current_tetromino.stick_to_grid(&mut self.grid);
+            log::info!("Current tetromino is stuck!");
+            self.current_tetromino = Tetromino::make_straight();
+        }
     }
 
     fn log_grid(&self) -> () {
@@ -225,12 +232,6 @@ impl BoardCommandLine for Well {
         for x in 0..self.grid.len() {
             log::info!("{:?}", self.grid[x]);
         }
-    }
-
-    fn stick_tetromino(&mut self) -> () {
-        todo!("Write the tetromino to the grid.");
-        todo!("Select a new tetromino and put it at the top.");
-        todo!("Increase the refresh rate slightly.");
     }
 
     fn quit(&mut self) -> () {
