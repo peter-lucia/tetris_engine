@@ -58,6 +58,7 @@ pub trait BoardCommandLine {
     fn new() -> Self;
     fn render(&mut self, erase: bool) -> ();
     fn run(&mut self) -> crossterm::Result<()>;
+    fn clear_filled_rows(&mut self) -> ();
     fn move_tetromino(&mut self, direction: Direction) -> ();
     fn log_grid(&self) -> ();
     fn quit(&mut self) -> ();
@@ -221,18 +222,41 @@ impl BoardCommandLine for Well {
             log::info!("Current tetromino is stuck!");
             self.current_tetromino = Tetromino::make_straight();
         }
-        // check if any row is full, if so, clear it
-        for x in 1..self.grid.len()-1 {
-            if self.grid[x] == [1; WELL_WIDTH] {
-                log::info!("Clearing row {}", x);
-                self.grid[x] = [0; WELL_WIDTH];
-                self.grid[x][0] = 1;
-                self.grid[x][WELL_WIDTH-1] = 1;
-                for y in 1..self.grid[x].len()-1 {
-                    self.stdout.queue(cursor::MoveTo(y as u16, x as u16)); // must be reversed
+        self.clear_filled_rows();
+    }
+
+    /// Check if any row is full, if so, clear it and let blocks above fall down
+    fn clear_filled_rows(&mut self) -> () {
+        for y in 1..self.grid.len()-1 {
+            if self.grid[y] == [1; WELL_WIDTH] {
+                log::info!("Clearing row {}", y);
+                self.grid[y] = [0; WELL_WIDTH];
+                self.grid[y][0] = 1;
+                self.grid[y][WELL_WIDTH-1] = 1;
+                for x in 1..self.grid[y].len()-1 {
+                    self.stdout.queue(cursor::MoveTo(x as u16, y as u16));
                     self.stdout.queue(style::PrintStyledContent(" ".black()));
                 }
                 self.stdout.flush();
+            }
+        }
+        let mut blocks_falling: bool = true;
+        while blocks_falling {
+            // let blocks fall down
+            blocks_falling = false;
+            for y in 2..self.grid.len()-1 {
+                for x in 1..self.grid[y].len()-1 {
+                    if self.grid[y-1][x] == 1 && self.grid[y][x] == 0 {
+                        self.grid[y-1][x] = 0;
+                        self.grid[y][x] = 1;
+                        self.stdout.queue(cursor::MoveTo(x as u16, (y - 1) as u16));
+                        self.stdout.queue(style::PrintStyledContent(" ".black()));
+                        self.stdout.queue(cursor::MoveTo(x as u16, y as u16));
+                        self.stdout.queue(style::PrintStyledContent("█".white()));
+                        self.stdout.flush();
+                        blocks_falling = true;
+                    }
+                }
             }
         }
     }
