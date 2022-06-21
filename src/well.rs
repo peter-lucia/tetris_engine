@@ -1,10 +1,4 @@
-use crate::tetromino::{
-    Tetromino,
-    TetrominoL,
-    TETROMINO_HEIGHT,
-    TETROMINO_WIDTH,
-    TetrominoStraight,
-};
+use crate::tetromino::{Tetromino, TetrominoL, TETROMINO_HEIGHT, TETROMINO_WIDTH, TetrominoStraight, get_random_tetromino};
 use rand::Rng;
 use std::thread::sleep;
 use std::time::Duration;
@@ -27,6 +21,17 @@ use std::borrow::BorrowMut;
 
 pub const WELL_WIDTH: usize = 14;
 pub const WELL_HEIGHT: usize = 20;
+
+macro_rules! cmdline_color_white {
+    () => {
+        "█".white();
+    }
+}
+macro_rules! cmdline_color_black {
+    () => {
+        " ".black();
+    }
+}
 
 pub struct Well {
     grid: [[i32; WELL_WIDTH]; WELL_HEIGHT],
@@ -77,21 +82,21 @@ impl BoardCommandLine for Well {
             // where the well is of height 18 with two lines for the top (if needed) and bottom
             grid: [[0; WELL_WIDTH]; WELL_HEIGHT],
             stdout: stdout,
-            current_tetromino: Tetromino::make_l(),
+            current_tetromino: get_random_tetromino(),
         };
         // paint the outline of the board
-        let mut output = " ".black();
+        let mut output = cmdline_color_black!();
         for x in 0..WELL_WIDTH {
             for y in 0..WELL_HEIGHT{
                 if y == 0 || y == WELL_HEIGHT - 1 {
-                    output = "█".white();
+                    output = cmdline_color_white!();
                     result.grid[y][x] = 1;
                 }
                 else if x == 0 || x == WELL_WIDTH - 1 {
-                    output = "█".white();
+                    output = cmdline_color_white!();
                     result.grid[y][x] = 1;
                 } else {
-                    output = " ".black();
+                    output = cmdline_color_black!();
                     result.grid[y][x] = 0;
                 }
                 result.stdout.queue(cursor::MoveTo(x as u16, y as u16)); // must be reversed
@@ -121,13 +126,13 @@ impl BoardCommandLine for Well {
                 if !erase && self.current_tetromino.area[yy][xx] == 1 {
                     self.grid[y][x] = 2;
                     self.stdout.queue(cursor::MoveTo(x as u16, y as u16));
-                    self.stdout.queue(style::PrintStyledContent("█".white()));
+                    self.stdout.queue(style::PrintStyledContent(cmdline_color_white!()));
                 } else {
                     if y > 0 && y < WELL_HEIGHT - 1 && x > 0 && x < WELL_WIDTH - 1
                         && self.grid[y][x] == 2 {
                         self.grid[y][x] = 0;
                         self.stdout.queue(cursor::MoveTo(x as u16, y as u16)); // must be reversed
-                        self.stdout.queue(style::PrintStyledContent(" ".white()));
+                        self.stdout.queue(style::PrintStyledContent(cmdline_color_black!()));
                     }
                 }
                 self.stdout.flush();
@@ -220,27 +225,28 @@ impl BoardCommandLine for Well {
         if self.current_tetromino.is_stuck(self.grid) {
             self.current_tetromino.stick_to_grid(&mut self.grid);
             log::info!("Current tetromino is stuck!");
-            self.current_tetromino = Tetromino::make_straight();
+            self.current_tetromino = get_random_tetromino();
         }
         self.clear_filled_rows();
     }
 
     /// Check if any row is full, if so, clear it and let blocks above fall down
     fn clear_filled_rows(&mut self) -> () {
+        let mut blocks_falling: bool = false;
         for y in 1..self.grid.len()-1 {
             if self.grid[y] == [1; WELL_WIDTH] {
+                blocks_falling = true;
                 log::info!("Clearing row {}", y);
                 self.grid[y] = [0; WELL_WIDTH];
                 self.grid[y][0] = 1;
                 self.grid[y][WELL_WIDTH-1] = 1;
                 for x in 1..self.grid[y].len()-1 {
                     self.stdout.queue(cursor::MoveTo(x as u16, y as u16));
-                    self.stdout.queue(style::PrintStyledContent(" ".black()));
+                    self.stdout.queue(style::PrintStyledContent(cmdline_color_black!()));
                 }
                 self.stdout.flush();
             }
         }
-        let mut blocks_falling: bool = true;
         while blocks_falling {
             // let blocks fall down
             blocks_falling = false;
@@ -250,9 +256,9 @@ impl BoardCommandLine for Well {
                         self.grid[y-1][x] = 0;
                         self.grid[y][x] = 1;
                         self.stdout.queue(cursor::MoveTo(x as u16, (y - 1) as u16));
-                        self.stdout.queue(style::PrintStyledContent(" ".black()));
+                        self.stdout.queue(style::PrintStyledContent(cmdline_color_black!()));
                         self.stdout.queue(cursor::MoveTo(x as u16, y as u16));
-                        self.stdout.queue(style::PrintStyledContent("█".white()));
+                        self.stdout.queue(style::PrintStyledContent(cmdline_color_white!()));
                         self.stdout.flush();
                         blocks_falling = true;
                     }

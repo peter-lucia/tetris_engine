@@ -1,4 +1,5 @@
 use std::cmp::{max, min};
+use rand::Rng;
 use crate::well::{WELL_WIDTH, WELL_HEIGHT};
 
 pub const TETROMINO_WIDTH: usize = 4;
@@ -302,6 +303,20 @@ impl TetrominoSkew for Tetromino {
             ..Default::default()
         }
     }
+}
+
+/// Gets a random tetromino
+pub fn get_random_tetromino() -> Tetromino {
+    // Get a random in the range [0, 4)
+    let num = rand::thread_rng().gen_range(0..4);
+    match num {
+        0 => return Tetromino::make_straight(),
+        1 => return Tetromino::make_l(),
+        2 => return Tetromino::make_skew(),
+        3 => return Tetromino::make_square(),
+        _ => log::error!("Random error generate gave unexpected output."),
+    }
+    return Tetromino::make_l();
 }
 
 #[cfg(test)]
