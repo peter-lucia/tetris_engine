@@ -61,9 +61,10 @@ pub trait BoardCommandLine {
     pub is implied in traits
      */
     fn new() -> Self;
-    fn render(&mut self, erase: bool) -> ();
+    fn render_edges(&mut self) -> ();
+    fn render_tetromino(&mut self, erase: bool) -> ();
     fn run(&mut self) -> crossterm::Result<()>;
-    fn clear_filled_rows(&mut self) -> ();
+    fn render_falling_blocks(&mut self) -> ();
     fn move_tetromino(&mut self, direction: Direction) -> ();
     fn log_grid(&self) -> ();
     fn quit(&mut self) -> ();
@@ -84,27 +85,33 @@ impl BoardCommandLine for Well {
             stdout: stdout,
             current_tetromino: get_random_tetromino(),
         };
+        result.render_edges();
+
+        return result;
+    }
+
+    fn render_edges(&mut self) -> () {
         // paint the outline of the board
         let mut output = cmdline_color_black!();
         for x in 0..WELL_WIDTH {
             for y in 0..WELL_HEIGHT{
                 if y == 0 || y == WELL_HEIGHT - 1 {
                     output = cmdline_color_white!();
-                    result.grid[y][x] = 1;
+                    self.grid[y][x] = 1;
                 }
                 else if x == 0 || x == WELL_WIDTH - 1 {
                     output = cmdline_color_white!();
-                    result.grid[y][x] = 1;
+                    self.grid[y][x] = 1;
                 } else {
                     output = cmdline_color_black!();
-                    result.grid[y][x] = 0;
+                    self.grid[y][x] = 0;
                 }
-                result.stdout.queue(cursor::MoveTo(x as u16, y as u16)); // must be reversed
-                result.stdout.queue(style::PrintStyledContent(output));
-                result.stdout.flush();
+                self.stdout.queue(cursor::MoveTo(x as u16, y as u16)); // must be reversed
+                self.stdout.queue(style::PrintStyledContent(output));
+                self.stdout.flush();
             }
         }
-        return result;
+
     }
 
     /// Render the tetromino 4x4 grid onto the tetris well
@@ -113,7 +120,7 @@ impl BoardCommandLine for Well {
     /// until they are stuck
     /// 2 on grid means tetrominomo is not stuck
     /// 1 on grid corresponds with a border or a stuck tetromino
-    fn render(&mut self, erase: bool) -> () {
+    fn render_tetromino(&mut self, erase: bool) -> () {
 
         let x_min = self.current_tetromino.x;
         let x_max = self.current_tetromino.x + TETROMINO_WIDTH;
@@ -172,7 +179,7 @@ impl BoardCommandLine for Well {
                             self.move_tetromino(Direction::Up);
                         }
                         else if event.code == KeyCode::Char('r') {
-                            self.render(true);
+                            self.render_tetromino(true);
                             let mut i = 0;
                             loop {
                                 self.current_tetromino.rotate(false);
@@ -182,7 +189,7 @@ impl BoardCommandLine for Well {
                                 }
                                 i += 1;
                             }
-                            self.render(false);
+                            self.render_tetromino(false);
                         }
                     },
                     Event::Mouse(event) => {
@@ -197,7 +204,7 @@ impl BoardCommandLine for Well {
     }
 
     fn move_tetromino(&mut self, direction: Direction) -> () {
-        self.render(true);
+        self.render_tetromino(true);
         match direction {
             Direction::Left => {
                 if !self.current_tetromino.will_collide(self.grid, -1, 0) {
@@ -220,18 +227,18 @@ impl BoardCommandLine for Well {
                 // }
             }
         }
-        self.render(false);
+        self.render_tetromino(false);
         log::info!("Current position ({},{})", self.current_tetromino.x, self.current_tetromino.y);
         if self.current_tetromino.is_stuck(self.grid) {
             self.current_tetromino.stick_to_grid(&mut self.grid);
             log::info!("Current tetromino is stuck!");
             self.current_tetromino = get_random_tetromino();
         }
-        self.clear_filled_rows();
+        self.render_falling_blocks();
     }
 
     /// Check if any row is full, if so, clear it and let blocks above fall down
-    fn clear_filled_rows(&mut self) -> () {
+    fn render_falling_blocks(&mut self) -> () {
         let mut blocks_falling: bool = false;
         for y in 1..self.grid.len()-1 {
             if self.grid[y] == [1; WELL_WIDTH] {
