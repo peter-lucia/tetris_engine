@@ -63,8 +63,8 @@ pub trait BoardCommandLine {
     fn new() -> Self;
     fn render_edges(&mut self) -> ();
     fn render_tetromino(&mut self, erase: bool) -> ();
-    fn run(&mut self) -> crossterm::Result<()>;
     fn render_falling_blocks(&mut self) -> ();
+    fn run(&mut self) -> crossterm::Result<()>;
     fn move_tetromino(&mut self, direction: Direction) -> ();
     fn log_grid(&self) -> ();
     fn quit(&mut self) -> ();
@@ -146,6 +146,43 @@ impl BoardCommandLine for Well {
             }
         }
         self.log_grid();
+    }
+
+    /// Check if any row is full, if so, clear it and let blocks above fall down
+    fn render_falling_blocks(&mut self) -> () {
+        let mut blocks_falling: bool = false;
+        for y in 1..self.grid.len()-1 {
+            if self.grid[y] == [1; WELL_WIDTH] {
+                blocks_falling = true;
+                log::info!("Clearing row {}", y);
+                self.grid[y] = [0; WELL_WIDTH];
+                self.grid[y][0] = 1;
+                self.grid[y][WELL_WIDTH-1] = 1;
+                for x in 1..self.grid[y].len()-1 {
+                    self.stdout.queue(cursor::MoveTo(x as u16, y as u16));
+                    self.stdout.queue(style::PrintStyledContent(cmdline_color_black!()));
+                }
+                self.stdout.flush();
+            }
+        }
+        while blocks_falling {
+            // let blocks fall down
+            blocks_falling = false;
+            for y in 2..self.grid.len()-1 {
+                for x in 1..self.grid[y].len()-1 {
+                    if self.grid[y-1][x] == 1 && self.grid[y][x] == 0 {
+                        self.grid[y-1][x] = 0;
+                        self.grid[y][x] = 1;
+                        self.stdout.queue(cursor::MoveTo(x as u16, (y - 1) as u16));
+                        self.stdout.queue(style::PrintStyledContent(cmdline_color_black!()));
+                        self.stdout.queue(cursor::MoveTo(x as u16, y as u16));
+                        self.stdout.queue(style::PrintStyledContent(cmdline_color_white!()));
+                        self.stdout.flush();
+                        blocks_falling = true;
+                    }
+                }
+            }
+        }
     }
 
     /// Gradually increases the refresh rate, moving the tetromino down a block faster with each
@@ -235,43 +272,6 @@ impl BoardCommandLine for Well {
             self.current_tetromino = get_random_tetromino();
         }
         self.render_falling_blocks();
-    }
-
-    /// Check if any row is full, if so, clear it and let blocks above fall down
-    fn render_falling_blocks(&mut self) -> () {
-        let mut blocks_falling: bool = false;
-        for y in 1..self.grid.len()-1 {
-            if self.grid[y] == [1; WELL_WIDTH] {
-                blocks_falling = true;
-                log::info!("Clearing row {}", y);
-                self.grid[y] = [0; WELL_WIDTH];
-                self.grid[y][0] = 1;
-                self.grid[y][WELL_WIDTH-1] = 1;
-                for x in 1..self.grid[y].len()-1 {
-                    self.stdout.queue(cursor::MoveTo(x as u16, y as u16));
-                    self.stdout.queue(style::PrintStyledContent(cmdline_color_black!()));
-                }
-                self.stdout.flush();
-            }
-        }
-        while blocks_falling {
-            // let blocks fall down
-            blocks_falling = false;
-            for y in 2..self.grid.len()-1 {
-                for x in 1..self.grid[y].len()-1 {
-                    if self.grid[y-1][x] == 1 && self.grid[y][x] == 0 {
-                        self.grid[y-1][x] = 0;
-                        self.grid[y][x] = 1;
-                        self.stdout.queue(cursor::MoveTo(x as u16, (y - 1) as u16));
-                        self.stdout.queue(style::PrintStyledContent(cmdline_color_black!()));
-                        self.stdout.queue(cursor::MoveTo(x as u16, y as u16));
-                        self.stdout.queue(style::PrintStyledContent(cmdline_color_white!()));
-                        self.stdout.flush();
-                        blocks_falling = true;
-                    }
-                }
-            }
-        }
     }
 
     fn log_grid(&self) -> () {
