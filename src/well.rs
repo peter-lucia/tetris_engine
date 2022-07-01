@@ -37,6 +37,7 @@ pub struct Well {
     grid: [[i32; WELL_WIDTH]; WELL_HEIGHT],
     stdout: Stdout,
     current_tetromino: Tetromino,
+    score: i32,
 }
 
 pub enum Direction {
@@ -62,6 +63,8 @@ pub trait BoardCommandLine {
      */
     fn new() -> Self;
     fn render_edges(&mut self) -> ();
+    fn render_score(&mut self, score: i32);
+    fn write_to_stdout(&mut self, x: usize, y: usize, style: StyledContent<&str>);
     fn render_tetromino(&mut self, erase: bool) -> ();
     fn render_falling_blocks(&mut self) -> ();
     fn run(&mut self) -> crossterm::Result<()>;
@@ -84,8 +87,10 @@ impl BoardCommandLine for Well {
             grid: [[0; WELL_WIDTH]; WELL_HEIGHT],
             stdout: stdout,
             current_tetromino: get_random_tetromino(),
+            score: 0,
         };
         result.render_edges();
+        result.render_score(result.score);
 
         return result;
     }
@@ -94,7 +99,7 @@ impl BoardCommandLine for Well {
         // paint the outline of the board
         let mut output = cmdline_color_black!();
         for x in 0..WELL_WIDTH {
-            for y in 0..WELL_HEIGHT{
+            for y in 0..WELL_HEIGHT {
                 if y == 0 || y == WELL_HEIGHT - 1 {
                     output = cmdline_color_white!();
                     self.grid[y][x] = 1;
@@ -106,12 +111,26 @@ impl BoardCommandLine for Well {
                     output = cmdline_color_black!();
                     self.grid[y][x] = 0;
                 }
-                self.stdout.queue(cursor::MoveTo(x as u16, y as u16)); // must be reversed
-                self.stdout.queue(style::PrintStyledContent(output));
+                self.write_to_stdout(x, y, output);
                 self.stdout.flush();
             }
         }
 
+    }
+
+    fn render_score(&mut self, score: i32) {
+        let x = 100 + (WELL_WIDTH / 3) as i32;
+        let y = 8;
+        self.stdout.queue(cursor::MoveTo((x) as u16, (y) as u16)); // must be reversed
+        let current_score = format!("Score: {}", score);
+        self.stdout.queue(style::Print(current_score));
+    }
+
+    fn write_to_stdout(&mut self, x: usize, y: usize, style: StyledContent<&str>) {
+        let x_offset = 100;
+        let y_offset = 10;
+        self.stdout.queue(cursor::MoveTo((x+x_offset) as u16, (y+y_offset) as u16)); // must be reversed
+        self.stdout.queue(style::PrintStyledContent(style));
     }
 
     /// Render the tetromino 4x4 grid onto the tetris well
@@ -132,14 +151,12 @@ impl BoardCommandLine for Well {
                 let xx = max(0, x - self.current_tetromino.x);
                 if !erase && self.current_tetromino.area[yy][xx] == 1 {
                     self.grid[y][x] = 2;
-                    self.stdout.queue(cursor::MoveTo(x as u16, y as u16));
-                    self.stdout.queue(style::PrintStyledContent(cmdline_color_white!()));
+                    self.write_to_stdout(x, y, cmdline_color_white!());
                 } else {
                     if y > 0 && y < WELL_HEIGHT - 1 && x > 0 && x < WELL_WIDTH - 1
                         && self.grid[y][x] == 2 {
                         self.grid[y][x] = 0;
-                        self.stdout.queue(cursor::MoveTo(x as u16, y as u16)); // must be reversed
-                        self.stdout.queue(style::PrintStyledContent(cmdline_color_black!()));
+                        self.write_to_stdout(x, y, cmdline_color_black!());
                     }
                 }
                 self.stdout.flush();
@@ -155,12 +172,13 @@ impl BoardCommandLine for Well {
             if self.grid[y] == [1; WELL_WIDTH] {
                 blocks_falling = true;
                 log::info!("Clearing row {}", y);
+                self.score += 100;
+                self.render_score(self.score);
                 self.grid[y] = [0; WELL_WIDTH];
                 self.grid[y][0] = 1;
                 self.grid[y][WELL_WIDTH-1] = 1;
                 for x in 1..self.grid[y].len()-1 {
-                    self.stdout.queue(cursor::MoveTo(x as u16, y as u16));
-                    self.stdout.queue(style::PrintStyledContent(cmdline_color_black!()));
+                    self.write_to_stdout(x, y, cmdline_color_black!());
                 }
                 self.stdout.flush();
             }
@@ -173,10 +191,8 @@ impl BoardCommandLine for Well {
                     if self.grid[y-1][x] == 1 && self.grid[y][x] == 0 {
                         self.grid[y-1][x] = 0;
                         self.grid[y][x] = 1;
-                        self.stdout.queue(cursor::MoveTo(x as u16, (y - 1) as u16));
-                        self.stdout.queue(style::PrintStyledContent(cmdline_color_black!()));
-                        self.stdout.queue(cursor::MoveTo(x as u16, y as u16));
-                        self.stdout.queue(style::PrintStyledContent(cmdline_color_white!()));
+                        self.write_to_stdout(x, y - 1, cmdline_color_black!());
+                        self.write_to_stdout(x, y, cmdline_color_white!());
                         self.stdout.flush();
                         blocks_falling = true;
                     }
