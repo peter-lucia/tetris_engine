@@ -6,3 +6,6 @@ My command line implementation of tetris in rust
 ### Getting started
 1. Clone this repo
 2. `cargo run`
+3. Controls 
+  * Use vim keybindings to move a tetromino left, right, and down
+  * Press 'q' to quit
