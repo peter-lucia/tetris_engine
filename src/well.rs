@@ -18,9 +18,14 @@ use std::error::Error;
 use std::cmp::{min, max};
 use std::time::Instant;
 use std::borrow::BorrowMut;
+use std::fs;
+use std::path::Path;
 
 pub const WELL_WIDTH: usize = 14;
 pub const WELL_HEIGHT: usize = 20;
+const HIGH_SCORE_FILENAME: &str = "HIGH_SCORE";
+const X_OFFSET: usize = 100;
+const Y_OFFSET: usize = 10;
 
 macro_rules! cmdline_color_white {
     () => {
@@ -38,6 +43,7 @@ pub struct Well {
     stdout: Stdout,
     current_tetromino: Tetromino,
     score: i32,
+    running: bool,
 }
 
 pub enum Direction {
@@ -64,7 +70,11 @@ pub trait BoardCommandLine {
     fn new() -> Self;
     fn render_edges(&mut self) -> ();
     fn render_score(&mut self, score: i32);
+    fn render_game_status(&mut self, status: &str);
+    fn record_high_score(&mut self) -> ();
     fn write_to_stdout(&mut self, x: usize, y: usize, style: StyledContent<&str>);
+    fn get_high_score(&self) -> i32;
+    fn set_high_score(&self, high_score: i32) -> ();
     fn render_tetromino(&mut self, erase: bool) -> ();
     fn render_falling_blocks(&mut self) -> ();
     fn run(&mut self) -> crossterm::Result<()>;
@@ -88,6 +98,7 @@ impl BoardCommandLine for Well {
             stdout: stdout,
             current_tetromino: get_random_tetromino(),
             score: 0,
+            running: true,
         };
         result.render_edges();
         result.render_score(result.score);
@@ -118,18 +129,25 @@ impl BoardCommandLine for Well {
 
     }
 
-    fn render_score(&mut self, score: i32) {
-        let x = 100 + (WELL_WIDTH / 3) as i32;
-        let y = 8;
+    fn render_game_status(&mut self, status: &str) {
+        let x = X_OFFSET + (WELL_WIDTH / 4) as usize;
+        let y = Y_OFFSET - 4;
         self.stdout.queue(cursor::MoveTo((x) as u16, (y) as u16)); // must be reversed
-        let current_score = format!("Score: {}", score);
+        self.stdout.queue(style::Print(status.to_string()));
+    }
+
+    fn render_score(&mut self, score: i32) {
+        let x = X_OFFSET - 10;
+        let y = Y_OFFSET - 2;
+        self.stdout.queue(cursor::MoveTo((x) as u16, (y) as u16)); // must be reversed
+        let current_score = format!("Current Score: {} High Score: {}",
+                                    score,
+                                    self.get_high_score());
         self.stdout.queue(style::Print(current_score));
     }
 
     fn write_to_stdout(&mut self, x: usize, y: usize, style: StyledContent<&str>) {
-        let x_offset = 100;
-        let y_offset = 10;
-        self.stdout.queue(cursor::MoveTo((x+x_offset) as u16, (y+y_offset) as u16)); // must be reversed
+        self.stdout.queue(cursor::MoveTo((x+X_OFFSET) as u16, (y+Y_OFFSET) as u16)); // must be reversed
         self.stdout.queue(style::PrintStyledContent(style));
     }
 
@@ -205,7 +223,7 @@ impl BoardCommandLine for Well {
     /// finished epoch.
     fn run(&mut self) -> crossterm::Result<()> {
         let mut last_instant = Instant::now();
-        loop {
+        while self.running {
             let current_instant= Instant::now();
             if current_instant.duration_since(last_instant) > Duration::from_secs(1) {
                 last_instant = current_instant;
@@ -215,23 +233,34 @@ impl BoardCommandLine for Well {
                 match read().unwrap() {
                     Event::Key(event) => {
                         if event.code == KeyCode::Char('q') {
-                            self.stdout.execute(terminal::Clear(terminal::ClearType::FromCursorUp));
+                            self.record_high_score();
+                            self.render_game_status("Game Over!");
+                            self.stdout.execute(terminal::Clear(terminal::ClearType::All));
                             // exit
                             return Ok(());
                         }
-                        else if event.code == KeyCode::Left || event.code == KeyCode::Char('h') {
+                        else if event.code == KeyCode::Left
+                            || event.code == KeyCode::Char('h')
+                            || event.code == KeyCode::Char('a') {
                             self.move_tetromino(Direction::Left);
                         }
-                        else if event.code == KeyCode::Right || event.code == KeyCode::Char('l') {
+                        else if event.code == KeyCode::Right
+                            || event.code == KeyCode::Char('l')
+                            || event.code == KeyCode::Char('d') {
                             self.move_tetromino(Direction::Right);
                         }
-                        else if event.code == KeyCode::Down || event.code == KeyCode::Char('j') {
+                        else if event.code == KeyCode::Down
+                            || event.code == KeyCode::Char('j')
+                            || event.code == KeyCode::Char('s') {
                             self.move_tetromino(Direction::Down);
                         }
-                        else if event.code == KeyCode::Up || event.code == KeyCode::Char('k') {
+                        else if event.code == KeyCode::Up
+                            || event.code == KeyCode::Char('k')
+                            || event.code == KeyCode::Char('w') {
                             self.move_tetromino(Direction::Up);
                         }
-                        else if event.code == KeyCode::Char('r') {
+                        else if event.code == KeyCode::Char('r')
+                            || event.code == KeyCode::Char(' ') {
                             self.render_tetromino(true);
                             let mut i = 0;
                             loop {
@@ -254,6 +283,7 @@ impl BoardCommandLine for Well {
                 }
             }
         }
+        return crossterm::Result::Ok(());
     }
 
     fn move_tetromino(&mut self, direction: Direction) -> () {
@@ -272,6 +302,10 @@ impl BoardCommandLine for Well {
             Direction::Down => {
                 if !self.current_tetromino.will_collide(self.grid, 0, 1) {
                     self.current_tetromino.y += 1;
+                } else {
+                    self.record_high_score();
+                    self.render_game_status("Game Over!");
+                    self.running = false;
                 }
             }
             Direction::Up => {
@@ -288,6 +322,27 @@ impl BoardCommandLine for Well {
             self.current_tetromino = get_random_tetromino();
         }
         self.render_falling_blocks();
+    }
+
+    fn record_high_score(&mut self) -> () {
+        let mut high_score = self.get_high_score();
+        if self.score > high_score {
+            high_score = self.score
+        }
+        self.set_high_score(high_score);
+    }
+
+    fn get_high_score(&self) -> i32 {
+        let mut high_score = 0;
+        if Path::new(HIGH_SCORE_FILENAME).exists() {
+            high_score = fs::read_to_string(HIGH_SCORE_FILENAME)
+                .unwrap().parse().unwrap();
+        }
+        return high_score;
+    }
+
+    fn set_high_score(&self, high_score: i32) -> () {
+        fs::write(HIGH_SCORE_FILENAME, high_score.to_string());
     }
 
     fn log_grid(&self) -> () {
