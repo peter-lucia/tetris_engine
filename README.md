@@ -1,7 +1,7 @@
 # Tetris
 My command line implementation of tetris in rust
 
-![Tetris](images/game4.png)
+![Tetris](images/game5.gif)
 
 ### Getting started
 1. Clone this repo
