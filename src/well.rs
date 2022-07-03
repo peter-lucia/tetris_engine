@@ -245,7 +245,14 @@ impl BoardCommandLine for Well {
             let current_instant= Instant::now();
             if current_instant.duration_since(last_instant) > Duration::from_millis(self.fall_delay_ms) {
                 last_instant = current_instant;
-                self.move_tetromino(Direction::Down);
+                log::info!("Current position ({},{})", self.current_tetromino.x, self.current_tetromino.y);
+                if self.current_tetromino.is_stuck(self.grid) && self.current_tetromino.y != 0 {
+                    self.current_tetromino.stick_to_grid(&mut self.grid);
+                    log::info!("Current tetromino is stuck!");
+                    self.current_tetromino = get_random_tetromino();
+                } else {
+                    self.move_tetromino(Direction::Down);
+                }
             }
             if poll(Duration::from_millis(1))? {
                 match read().unwrap() {
@@ -325,7 +332,7 @@ impl BoardCommandLine for Well {
             Direction::Down => {
                 if !self.current_tetromino.will_collide(self.grid, 0, 1) {
                     self.current_tetromino.y += 1;
-                } else {
+                } else if self.current_tetromino.y == 0 {
                     self.record_high_score();
                     self.render_game_status("Game Over!");
                     self.running = false;
@@ -338,12 +345,6 @@ impl BoardCommandLine for Well {
             }
         }
         self.render_tetromino(false);
-        log::info!("Current position ({},{})", self.current_tetromino.x, self.current_tetromino.y);
-        if self.current_tetromino.is_stuck(self.grid) {
-            self.current_tetromino.stick_to_grid(&mut self.grid);
-            log::info!("Current tetromino is stuck!");
-            self.current_tetromino = get_random_tetromino();
-        }
         self.render_falling_blocks();
     }
 
