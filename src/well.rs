@@ -44,6 +44,7 @@ pub struct Well {
     current_tetromino: Tetromino,
     score: i32,
     running: bool,
+    fall_delay_ms: u64,
 }
 
 pub enum Direction {
@@ -99,6 +100,7 @@ impl BoardCommandLine for Well {
             current_tetromino: get_random_tetromino(),
             score: 0,
             running: true,
+            fall_delay_ms: 1000,
         };
         result.render_edges();
         result.render_score(result.score);
@@ -191,6 +193,9 @@ impl BoardCommandLine for Well {
                 blocks_falling = true;
                 log::info!("Clearing row {}", y);
                 self.score += 100;
+                if self.fall_delay_ms > 1 {
+                    self.fall_delay_ms -= 50;
+                }
                 self.render_score(self.score);
                 self.grid[y] = [0; WELL_WIDTH];
                 self.grid[y][0] = 1;
@@ -225,11 +230,11 @@ impl BoardCommandLine for Well {
         let mut last_instant = Instant::now();
         while self.running {
             let current_instant= Instant::now();
-            if current_instant.duration_since(last_instant) > Duration::from_secs(1) {
+            if current_instant.duration_since(last_instant) > Duration::from_millis(self.fall_delay_ms) {
                 last_instant = current_instant;
                 self.move_tetromino(Direction::Down);
             }
-            if poll(Duration::from_millis(5))? {
+            if poll(Duration::from_millis(1))? {
                 match read().unwrap() {
                     Event::Key(event) => {
                         if event.code == KeyCode::Char('q') {
