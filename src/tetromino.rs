@@ -165,7 +165,7 @@ impl Default for Tetromino {
                    [1,0,0,0],
                    [1,0,0,0]],
             x: WELL_WIDTH / 2, // horizontal starting position
-            y: 1, // height
+            y: 0, // height
         }
     }
 }

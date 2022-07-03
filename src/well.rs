@@ -21,11 +21,9 @@ use std::borrow::BorrowMut;
 use std::fs;
 use std::path::Path;
 
-pub const WELL_WIDTH: usize = 14;
+pub const WELL_WIDTH: usize = 20;
 pub const WELL_HEIGHT: usize = 20;
 const HIGH_SCORE_FILENAME: &str = "HIGH_SCORE";
-const X_OFFSET: usize = 100;
-const Y_OFFSET: usize = 10;
 
 macro_rules! cmdline_color_white {
     () => {
@@ -38,6 +36,14 @@ macro_rules! cmdline_color_black {
     }
 }
 
+fn get_x_offset() -> usize {
+    return ((terminal::size().unwrap().0 / 2) as usize - (WELL_WIDTH / 2)) as usize;
+}
+
+fn get_y_offset() -> usize {
+    return (terminal::size().unwrap().1 / 4) as usize;
+}
+
 pub struct Well {
     grid: [[i32; WELL_WIDTH]; WELL_HEIGHT],
     stdout: Stdout,
@@ -45,6 +51,8 @@ pub struct Well {
     score: i32,
     running: bool,
     fall_delay_ms: u64,
+    fall_delay_min_ms: u64,
+    fall_delay_delta: u64,
 }
 
 pub enum Direction {
@@ -69,7 +77,7 @@ pub trait BoardCommandLine {
     pub is implied in traits
      */
     fn new() -> Self;
-    fn render_edges(&mut self) -> ();
+    fn render_edges_and_stuck_pieces(&mut self) -> ();
     fn render_score(&mut self, score: i32);
     fn render_game_status(&mut self, status: &str);
     fn record_high_score(&mut self) -> ();
@@ -101,14 +109,16 @@ impl BoardCommandLine for Well {
             score: 0,
             running: true,
             fall_delay_ms: 1000,
+            fall_delay_min_ms: 100,
+            fall_delay_delta: 50,
         };
-        result.render_edges();
+        result.render_edges_and_stuck_pieces();
         result.render_score(result.score);
 
         return result;
     }
 
-    fn render_edges(&mut self) -> () {
+    fn render_edges_and_stuck_pieces(&mut self) -> () {
         // paint the outline of the board
         let mut output = cmdline_color_black!();
         for x in 0..WELL_WIDTH {
@@ -120,7 +130,10 @@ impl BoardCommandLine for Well {
                 else if x == 0 || x == WELL_WIDTH - 1 {
                     output = cmdline_color_white!();
                     self.grid[y][x] = 1;
-                } else {
+                } else if self.grid[y][x] == 1 {
+                    output = cmdline_color_white!()
+                }
+                else {
                     output = cmdline_color_black!();
                     self.grid[y][x] = 0;
                 }
@@ -132,15 +145,15 @@ impl BoardCommandLine for Well {
     }
 
     fn render_game_status(&mut self, status: &str) {
-        let x = X_OFFSET + (WELL_WIDTH / 4) as usize;
-        let y = Y_OFFSET - 4;
+        let x = get_x_offset() - 6;
+        let y = get_y_offset() - 4;
         self.stdout.queue(cursor::MoveTo((x) as u16, (y) as u16)); // must be reversed
         self.stdout.queue(style::Print(status.to_string()));
     }
 
     fn render_score(&mut self, score: i32) {
-        let x = X_OFFSET - 10;
-        let y = Y_OFFSET - 2;
+        let x = get_x_offset() - 6;
+        let y = get_y_offset() - 2;
         self.stdout.queue(cursor::MoveTo((x) as u16, (y) as u16)); // must be reversed
         let current_score = format!("Current Score: {} High Score: {}",
                                     score,
@@ -149,7 +162,7 @@ impl BoardCommandLine for Well {
     }
 
     fn write_to_stdout(&mut self, x: usize, y: usize, style: StyledContent<&str>) {
-        self.stdout.queue(cursor::MoveTo((x+X_OFFSET) as u16, (y+Y_OFFSET) as u16)); // must be reversed
+        self.stdout.queue(cursor::MoveTo((x+get_x_offset()) as u16, (y+get_y_offset()) as u16)); // must be reversed
         self.stdout.queue(style::PrintStyledContent(style));
     }
 
@@ -193,8 +206,8 @@ impl BoardCommandLine for Well {
                 blocks_falling = true;
                 log::info!("Clearing row {}", y);
                 self.score += 100;
-                if self.fall_delay_ms > 1 {
-                    self.fall_delay_ms -= 50;
+                if self.fall_delay_ms > self.fall_delay_min_ms {
+                    self.fall_delay_ms -= self.fall_delay_delta;
                 }
                 self.render_score(self.score);
                 self.grid[y] = [0; WELL_WIDTH];
@@ -284,6 +297,11 @@ impl BoardCommandLine for Well {
                     },
                     Event::Resize(width, height) => {
                         log::info!("New size {}x{}", width, height);
+                        let result = self.stdout.execute(
+                            terminal::Clear(terminal::ClearType::All)
+                        );
+                        self.render_edges_and_stuck_pieces();
+                        self.render_score(self.score);
                     },
                 }
             }
