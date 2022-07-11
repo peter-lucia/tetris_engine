@@ -1,5 +1,5 @@
 
-fn main() -> Result<()> {
+fn main() -> () {
 
 
 }

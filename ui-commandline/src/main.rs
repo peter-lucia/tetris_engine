@@ -1,7 +1,4 @@
 extern crate common;
-// mod tetromino;
-// mod well;
-// mod well_browser;
 mod well_command_line;
 
 use std::io::{stdout, Write};
