@@ -6,12 +6,12 @@ pub const TETROMINO_WIDTH: usize = 4;
 pub const TETROMINO_HEIGHT: usize = 4;
 
 
-/// ## Arguments
-///     * area The grid (e.g. 4x4) in which the tetromino will be drawn
-///     * x (height) position in the well coordinate plane
-///     * y (width) position in the well coordinate plane
-/// ## Resources
-///     * https://www.youtube.com/watch?v=8OK8_tHeCIA
+/// # Arguments
+/// * area The grid (e.g. 4x4) in which the tetromino will be drawn
+/// * x (height) position in the well coordinate plane
+/// * y (width) position in the well coordinate plane
+/// # Resources
+/// * https://www.youtube.com/watch?v=8OK8_tHeCIA
 pub struct Tetromino {
     pub area: [[i32; TETROMINO_WIDTH]; TETROMINO_HEIGHT],
     pub x: usize,
