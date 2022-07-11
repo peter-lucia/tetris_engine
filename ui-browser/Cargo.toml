@@ -1,0 +1,11 @@
+[package]
+name = "ui-browser"
+version = "0.1.0"
+edition = "2021"
+authors = ["Peter Lucia <peter-lucia@users.noreply.github.com>"]
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wasm-bindgen = "0.2"
