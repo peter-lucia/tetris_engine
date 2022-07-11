@@ -1,6 +1,7 @@
-mod tetromino;
-mod well;
-mod well_browser;
+extern crate common;
+// mod tetromino;
+// mod well;
+// mod well_browser;
 mod well_command_line;
 
 use std::io::{stdout, Write};
@@ -11,7 +12,7 @@ use crossterm::{
     style::{self, Stylize},
     Result,
 };
-use crate::well::{Well};
+use crate::common::well::{Well};
 use std::{io, thread, error::Error};
 use log::LevelFilter;
 use log4rs::append::file::FileAppender;

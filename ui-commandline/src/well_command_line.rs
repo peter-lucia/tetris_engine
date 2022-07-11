@@ -1,5 +1,4 @@
-use crate::tetromino::{get_random_tetromino, Tetromino, TETROMINO_HEIGHT, TETROMINO_WIDTH, TetrominoL, TetrominoStraight};
-use rand::Rng;
+use crate::common::tetromino::{get_random_tetromino, Tetromino, TETROMINO_HEIGHT, TETROMINO_WIDTH, TetrominoL, TetrominoStraight};
 use std::thread::sleep;
 use std::time::Duration;
 use std::io::{Stdout, stdout, Write};
@@ -13,9 +12,9 @@ use crossterm::{
 };
 use crossterm::style::{StyledContent, Stylize};
 use crossterm::event::{Event, poll, read};
-use crate::tetromino;
-use crate::well;
-use crate::well::{Direction, Well, WELL_HEIGHT, WELL_WIDTH};
+use crate::common::tetromino;
+use crate::common::well;
+use crate::common::well::{Direction, Well, WELL_HEIGHT, WELL_WIDTH};
 use std::error::Error;
 use std::cmp::{max, min};
 use std::time::Instant;
