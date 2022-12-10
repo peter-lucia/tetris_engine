@@ -21,7 +21,7 @@ use std::borrow::BorrowMut;
 use std::fs;
 use std::path::Path;
 
-pub const WELL_WIDTH: usize = 20;
+pub const WELL_WIDTH: usize = 14;
 pub const WELL_HEIGHT: usize = 20;
 const HIGH_SCORE_FILENAME: &str = "HIGH_SCORE";
 
