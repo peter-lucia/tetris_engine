@@ -11,3 +11,12 @@ crossterm = "0.23"
 log = "0.4"
 env_logger = "0.9"
 log4rs = "1.1.1"
+
+[lib]
+name = "rust_tetris"
+# "cdylib" is necessary to produce a shared library for Python to import from.
+crate-type = ["cdylib"]
+
+[dependencies.pyo3]
+version = "0.17.3"
+features = ["extension-module"]
