@@ -123,13 +123,9 @@ impl Tetris for Well {
     }
 
     fn render_game_status(&mut self, status: &str) {
-        let x = get_x_offset() - 6;
-        let y = get_y_offset() - 4;
     }
 
     fn render_score(&mut self, score: i32) {
-        let x = get_x_offset() - 6;
-        let y = get_y_offset() - 2;
     }
 
     /// Render the tetromino 4x4 grid onto the tetris well

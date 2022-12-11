@@ -2,4 +2,5 @@
 # https://pyo3.rs/v0.14.5/module.html
 from rust_tetris import get_well
 
-get_well()
+well = get_well()
+print(dir(well))

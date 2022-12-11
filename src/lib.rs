@@ -8,7 +8,7 @@ use pyo3::prelude::*;
 
 #[pyfunction]
 pub fn get_well() -> Well {
-    let mut well: Well = Well::new();
+    let mut well: Well = Tetris::new();
     return well;
 }
 
