@@ -53,6 +53,7 @@ pub struct Well {
     fall_delay_delta: u64,
 }
 
+#[pyclass]
 pub enum Direction {
     Up,
     Down,
@@ -131,6 +132,16 @@ impl Well {
 
     pub fn start_game(&mut self) -> () {
         do_start_game(self);
+    }
+
+    pub fn move_piece(&mut self, direction: &str) -> () {
+        match direction {
+            "Up" => {self.move_tetromino(Direction::Up)}
+            "Down" => {self.move_tetromino(Direction::Down)}
+            "Left" => {self.move_tetromino(Direction::Left)}
+            "Right" => {self.move_tetromino(Direction::Right)}
+            _ => {}
+        }
     }
 
 }

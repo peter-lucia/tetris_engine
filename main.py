@@ -7,4 +7,10 @@ from rust_tetris import MyTetris
 tetris = MyTetris()
 tetris.start_game()
 print("got here")
-tetris.rotate_tetromino()
+while True:
+    # tetris.rotate_tetromino()
+    for row in tetris.grid:
+        print(row)
+    print()
+    tetris.move_piece("Down")
+    sleep(1)
