@@ -1,6 +1,5 @@
 use crate::tetromino::{Tetromino, TetrominoL, TETROMINO_HEIGHT, TETROMINO_WIDTH, TetrominoStraight, get_random_tetromino};
 use rand::Rng;
-use std::thread::sleep;
 use std::time::Duration;
 use std::io::Write;
 use crate::tetromino;
@@ -8,7 +7,8 @@ use std::error::Error;
 use std::cmp::{min, max};
 use std::time::Instant;
 use std::borrow::BorrowMut;
-use std::fs;
+use std::{fs};
+use std::ops::DerefMut;
 use std::path::Path;
 use pyo3::prelude::*;
 
@@ -35,14 +35,21 @@ fn get_y_offset() -> usize {
     return 0;
 }
 
+/// https://pyo3.rs/main/class.html
 #[pyclass]
 pub struct Well {
+    #[pyo3(get)]
     grid: [[i32; WELL_WIDTH]; WELL_HEIGHT],
     current_tetromino: Tetromino,
+    #[pyo3(get)]
     score: i32,
+    #[pyo3(get)]
     running: bool,
+    #[pyo3(get, set)]
     fall_delay_ms: u64,
+    #[pyo3(get, set)]
     fall_delay_min_ms: u64,
+    #[pyo3(get, set)]
     fall_delay_delta: u64,
 }
 
@@ -79,6 +86,53 @@ pub trait Tetris {
     fn move_tetromino(&mut self, direction: Direction) -> ();
     fn log_grid(&self) -> ();
     fn quit(&mut self) -> ();
+}
+
+
+async fn do_start_game(_well: &mut Well) -> () {
+    let mut last_instant = Instant::now();
+    _well.render_edges_and_stuck_pieces();
+
+    while _well.running {
+        let current_instant = Instant::now();
+        if current_instant.duration_since(last_instant) > Duration::from_millis(_well.fall_delay_ms) {
+            last_instant = current_instant;
+            println!("Current position ({},{})", _well.current_tetromino.x, _well.current_tetromino.y);
+            log::info!("Current position ({},{})", _well.current_tetromino.x, _well.current_tetromino.y);
+            if _well.current_tetromino.is_stuck(_well.grid) && _well.current_tetromino.y != 0 {
+                _well.current_tetromino.stick_to_grid(&mut _well.grid);
+                log::info!("Current tetromino is stuck!");
+                _well.current_tetromino = get_random_tetromino();
+            } else {
+                _well.move_tetromino(Direction::Down);
+            }
+        }
+    }
+    _well.quit();
+
+}
+
+#[pymethods]
+impl Well {
+
+    pub fn rotate_tetromino(&mut self) -> () {
+        self.render_tetromino(true);
+        let mut i = 0;
+        loop {
+            self.current_tetromino.rotate(false);
+            if (!self.current_tetromino
+                .will_collide(self.grid, 0, 0)) || i == 4 {
+                break;
+            }
+            i += 1;
+        }
+        self.render_tetromino(false);
+    }
+
+    pub fn start_game(&mut self) -> () {
+        do_start_game(self);
+    }
+
 }
 
 

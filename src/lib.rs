@@ -3,11 +3,11 @@ mod well;
 
 use std::borrow::{Borrow, BorrowMut};
 use well::{Tetris};
-use crate::well::Well;
+use crate::well::{Well};
 use pyo3::prelude::*;
 
 #[pyfunction]
-pub fn get_well() -> Well {
+pub fn MyTetris() -> Well {
     let mut well: Well = Tetris::new();
     return well;
 }
@@ -21,7 +21,7 @@ pub fn get_well() -> Well {
 /// https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html
 #[pymodule]
 #[pyo3(name = "rust_tetris")]
-fn tetris(py: Python<'_>, m: &PyModule) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(get_well, m)?)?;
+fn setup_tetris(py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(MyTetris, m)?)?;
     Ok(())
 }
