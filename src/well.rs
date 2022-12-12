@@ -40,6 +40,7 @@ fn get_y_offset() -> usize {
 pub struct Well {
     #[pyo3(get)]
     grid: [[i32; WELL_WIDTH]; WELL_HEIGHT],
+    #[pyo3(get)]
     current_tetromino: Tetromino,
     #[pyo3(get)]
     score: i32,
@@ -90,9 +91,10 @@ pub trait Tetris {
 }
 
 
-async fn do_start_game(_well: &mut Well) -> () {
+pub async fn start_game(_well: &mut Well) -> () {
     let mut last_instant = Instant::now();
     _well.render_edges_and_stuck_pieces();
+    println!("Game Starting...");
 
     while _well.running {
         let current_instant = Instant::now();
@@ -113,6 +115,18 @@ async fn do_start_game(_well: &mut Well) -> () {
 
 }
 
+impl Clone for Well {
+    fn clone(&self) -> Self {
+        Self { grid: self.grid,
+            current_tetromino: self.current_tetromino,
+            score: self.score,
+            running: self.running,
+            fall_delay_ms: self.fall_delay_ms,
+            fall_delay_min_ms: self.fall_delay_min_ms,
+            fall_delay_delta: self.fall_delay_delta }
+    }
+}
+
 #[pymethods]
 impl Well {
 
@@ -128,10 +142,6 @@ impl Well {
             i += 1;
         }
         self.render_tetromino(false);
-    }
-
-    pub fn start_game(&mut self) -> () {
-        do_start_game(self);
     }
 
     pub fn move_piece(&mut self, direction: &str) -> () {

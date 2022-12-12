@@ -11,6 +11,8 @@ crossterm = "0.23"
 log = "0.4"
 env_logger = "0.9"
 log4rs = "1.1.1"
+pyo3-asyncio = { version = "0.17", features = ["async-std-runtime"] }
+async-std = "1.9"
 
 [lib]
 name = "rust_tetris"
