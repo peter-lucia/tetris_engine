@@ -40,7 +40,6 @@ fn get_y_offset() -> usize {
 pub struct Well {
     #[pyo3(get)]
     grid: [[i32; WELL_WIDTH]; WELL_HEIGHT],
-    #[pyo3(get)]
     current_tetromino: Tetromino,
     #[pyo3(get)]
     score: i32,
@@ -91,44 +90,33 @@ pub trait Tetris {
 }
 
 
-pub async fn start_game(_well: &mut Well) -> () {
-    let mut last_instant = Instant::now();
-    _well.render_edges_and_stuck_pieces();
-    println!("Game Starting...");
-
-    while _well.running {
-        let current_instant = Instant::now();
-        if current_instant.duration_since(last_instant) > Duration::from_millis(_well.fall_delay_ms) {
-            last_instant = current_instant;
-            println!("Current position ({},{})", _well.current_tetromino.x, _well.current_tetromino.y);
-            log::info!("Current position ({},{})", _well.current_tetromino.x, _well.current_tetromino.y);
-            if _well.current_tetromino.is_stuck(_well.grid) && _well.current_tetromino.y != 0 {
-                _well.current_tetromino.stick_to_grid(&mut _well.grid);
-                log::info!("Current tetromino is stuck!");
-                _well.current_tetromino = get_random_tetromino();
-            } else {
-                _well.move_tetromino(Direction::Down);
-            }
-        }
-    }
-    _well.quit();
-
-}
-
-impl Clone for Well {
-    fn clone(&self) -> Self {
-        Self { grid: self.grid,
-            current_tetromino: self.current_tetromino,
-            score: self.score,
-            running: self.running,
-            fall_delay_ms: self.fall_delay_ms,
-            fall_delay_min_ms: self.fall_delay_min_ms,
-            fall_delay_delta: self.fall_delay_delta }
-    }
-}
-
 #[pymethods]
 impl Well {
+
+    pub fn start_game(&mut self) -> () {
+        let mut last_instant = Instant::now();
+        self.render_edges_and_stuck_pieces();
+        println!("Game Starting...");
+
+        while self.running {
+            let current_instant = Instant::now();
+            if current_instant.duration_since(last_instant) > Duration::from_millis(self.fall_delay_ms) {
+                last_instant = current_instant;
+                println!("Current position ({},{})", self.current_tetromino.x, self.current_tetromino.y);
+                log::info!("Current position ({},{})", self.current_tetromino.x, self.current_tetromino.y);
+                if self.current_tetromino.is_stuck(self.grid) && self.current_tetromino.y != 0 {
+                    self.current_tetromino.stick_to_grid(&mut self.grid);
+                    log::info!("Current tetromino is stuck!");
+                    self.current_tetromino = get_random_tetromino();
+                } else {
+                    self.move_tetromino(Direction::Down);
+                }
+            }
+        }
+        self.quit();
+
+    }
+
 
     pub fn rotate_tetromino(&mut self) -> () {
         self.render_tetromino(true);
