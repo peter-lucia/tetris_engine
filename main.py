@@ -1,35 +1,20 @@
 # the name of the module must match the name of the .so or .pyd file in target/debug or target/release
 # https://pyo3.rs/v0.14.5/module.html
-import threading
 from time import sleep
+from rust_tetris import create_game, setup_game, run_frame, move_down
 
-from rust_tetris import MyTetris
-
-
-def start(tetris: MyTetris):
-    tetris.start_game()
-
-def status(tetris: MyTetris):
-    while True:
-        for row in tetris.grid:
-            print(row)
-        print("")
-        sleep(1)
 
 def main():
-    tetris = MyTetris()
-    t1 = threading.Thread(target=start, args=(tetris,))
-    t2 = threading.Thread(target=status, args=(tetris,))
 
-    t1.start()
-    t2.start()
-
-    # wait until thread 1 is completely executed
-    t1.join()
-    # wait until thread 2 is completely executed
-    t2.join()
-
+    t = create_game()
+    t = setup_game(t)
+    while True:
+        for row in t.grid:
+            print(row)
+        print()
+        t = move_down(t)
+        t = run_frame(t)
+        sleep(1)
 
 if __name__ == '__main__':
-    # asyncio.run(main())
     main()

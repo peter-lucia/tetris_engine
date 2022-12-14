@@ -12,6 +12,7 @@ use std::any::Any;
 use std::future::Future;
 use std::ops::DerefMut;
 use std::path::Path;
+use pyo3::prelude::*;
 
 pub const WELL_WIDTH: usize = 14;
 pub const WELL_HEIGHT: usize = 20;
@@ -37,15 +38,21 @@ fn get_y_offset() -> usize {
 }
 
 /// https://pyo3.rs/main/class.html
+#[pyclass]
 pub struct Well {
     current_instant: Instant,
     last_instant: Instant,
+    #[pyo3(get, set)]
     pub grid: [[i32; WELL_WIDTH]; WELL_HEIGHT],
     pub current_tetromino: Tetromino,
+    #[pyo3(get, set)]
     pub score: i32,
     pub running: bool,
+    #[pyo3(get, set)]
     pub fall_delay_ms: u64,
+    #[pyo3(get, set)]
     pub fall_delay_min_ms: u64,
+    #[pyo3(get, set)]
     pub fall_delay_delta: u64,
 }
 
@@ -83,12 +90,27 @@ pub trait Tetris {
     fn log_grid(&self) -> ();
     fn quit(&mut self) -> ();
     fn setup(&mut self) -> ();
-    fn run_loop(&mut self) -> ();
+    fn run_frame(&mut self) -> ();
     fn simulate_game(&mut self) -> ();
     fn rotate_tetromino(&mut self) -> ();
 }
 
 
+impl Clone for Well {
+    fn clone(&self) -> Self {
+        Well {
+            current_instant: self.current_instant,
+            last_instant: self.last_instant,
+            grid: self.grid,
+            current_tetromino: Default::default(),
+            score: self.score,
+            running: false,
+            fall_delay_ms: self.fall_delay_ms,
+            fall_delay_min_ms: self.fall_delay_min_ms,
+            fall_delay_delta: self.fall_delay_delta,
+        }
+    }
+}
 impl Tetris for Well {
 
     /// Creates a new well object
@@ -117,7 +139,7 @@ impl Tetris for Well {
         self.render_edges_and_stuck_pieces();
     }
 
-    fn run_loop(&mut self) -> () {
+    fn run_frame(&mut self) -> () {
         self.current_instant = Instant::now();
         if self.current_instant.duration_since(self.last_instant) > Duration::from_millis(self.fall_delay_ms) {
             self.last_instant = self.current_instant;
@@ -136,7 +158,7 @@ impl Tetris for Well {
     fn simulate_game(&mut self) -> () {
         self.setup();
         while self.running {
-            self.run_loop();
+            self.run_frame();
         }
         self.quit();
     }
