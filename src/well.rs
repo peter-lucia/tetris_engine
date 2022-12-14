@@ -38,6 +38,8 @@ fn get_y_offset() -> usize {
 
 /// https://pyo3.rs/main/class.html
 pub struct Well {
+    current_instant: Instant,
+    last_instant: Instant,
     pub grid: [[i32; WELL_WIDTH]; WELL_HEIGHT],
     pub current_tetromino: Tetromino,
     pub score: i32,
@@ -80,7 +82,9 @@ pub trait Tetris {
     fn move_tetromino(&mut self, direction: Direction) -> ();
     fn log_grid(&self) -> ();
     fn quit(&mut self) -> ();
-    fn start_game(&mut self) -> ();
+    fn setup(&mut self) -> ();
+    fn run_loop(&mut self) -> ();
+    fn simulate_game(&mut self) -> ();
     fn rotate_tetromino(&mut self) -> ();
 }
 
@@ -93,6 +97,8 @@ impl Tetris for Well {
             // |<---------- 12 --------->| plus 2 chars to display edge of wells = 14 x 20
             // where the well is of height 18 with two lines for the top (if needed) and bottom
             grid: [[0; WELL_WIDTH]; WELL_HEIGHT],
+            current_instant: Instant::now(),
+            last_instant: Instant::now(),
             current_tetromino: get_random_tetromino(),
             score: 0,
             running: true,
@@ -106,28 +112,33 @@ impl Tetris for Well {
         return result;
     }
 
-    fn start_game(self: &mut Well) -> () {
-        self.render_edges_and_stuck_pieces();
+    fn setup(&mut self) -> () {
         println!("Game Starting...");
-        let mut last_instant = Instant::now();
-        while self.running {
-            let current_instant = Instant::now();
-            if current_instant.duration_since(last_instant) > Duration::from_millis(self.fall_delay_ms) {
-                last_instant = current_instant;
-                println!("Current position ({},{})", self.current_tetromino.x, self.current_tetromino.y);
-                // log::info!("Current position ({},{})", self.current_tetromino.x, self.current_tetromino.y);
-                self.log_grid();
-                if self.current_tetromino.is_stuck(self.grid) && self.current_tetromino.y != 0 {
-                    self.current_tetromino.stick_to_grid(&mut self.grid);
-                    log::info!("Current tetromino is stuck!");
-                    self.current_tetromino = get_random_tetromino();
-                } else {
-                    self.move_tetromino(Direction::Down);
-                }
+        self.render_edges_and_stuck_pieces();
+    }
+
+    fn run_loop(&mut self) -> () {
+        self.current_instant = Instant::now();
+        if self.current_instant.duration_since(self.last_instant) > Duration::from_millis(self.fall_delay_ms) {
+            self.last_instant = self.current_instant;
+            println!("Current position ({},{})", self.current_tetromino.x, self.current_tetromino.y);
+            self.log_grid();
+            if self.current_tetromino.is_stuck(self.grid) && self.current_tetromino.y != 0 {
+                self.current_tetromino.stick_to_grid(&mut self.grid);
+                log::info!("Current tetromino is stuck!");
+                self.current_tetromino = get_random_tetromino();
+            } else {
+                self.move_tetromino(Direction::Down);
             }
         }
-        self.quit();
+    }
 
+    fn simulate_game(&mut self) -> () {
+        self.setup();
+        while self.running {
+            self.run_loop();
+        }
+        self.quit();
     }
 
 

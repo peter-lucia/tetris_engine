@@ -11,7 +11,7 @@ mod well;
 
 fn main() {
     let mut t: Well = Tetris::new();
-    t.start_game();
+    t.simulate_game();
 
 }
 
