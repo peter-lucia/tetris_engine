@@ -13,24 +13,21 @@ pub fn create_game() -> Well {
 }
 
 #[pyfunction]
-fn setup_game<'py>(py: Python<'py>, obj: PyObject) -> PyResult<Well> {
-    let mut _well: Well = obj.extract::<Well>(py)?;
+fn setup_game(_well: &mut Well) -> Well {
     _well.setup();
-    return Ok(_well);
+    return _well.clone();
 }
 
 #[pyfunction]
-fn run_frame<'py>(py: Python<'py>, obj: PyObject) -> PyResult<Well> {
-    let mut _well: Well = obj.extract::<Well>(py)?;
+fn run_frame(_well: &mut Well) -> Well {
     _well.run_frame();
-    return Ok(_well);
+    return _well.clone();
 }
 
 #[pyfunction]
-fn move_down<'py>(py: Python<'py>, obj: PyObject) -> PyResult<Well> {
-    let mut _well: Well = obj.extract::<Well>(py)?;
+fn move_down(_well: &mut Well) -> Well {
     _well.move_tetromino(Direction::Down);
-    return Ok(_well);
+    return _well.clone();
 }
 
 #[pyfunction]

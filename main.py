@@ -9,12 +9,12 @@ def main():
     t = create_game()
     t = setup_game(t)
     while True:
+        t = move_down(t)
+        t = run_frame(t)
         for row in t.grid:
             print(row)
         print()
-        t = move_down(t)
-        t = run_frame(t)
-        sleep(1)
+        sleep(.5)
 
 if __name__ == '__main__':
     main()

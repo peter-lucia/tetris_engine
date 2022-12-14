@@ -102,7 +102,7 @@ impl Clone for Well {
             current_instant: self.current_instant,
             last_instant: self.last_instant,
             grid: self.grid,
-            current_tetromino: Default::default(),
+            current_tetromino: self.current_tetromino.clone(),
             score: self.score,
             running: false,
             fall_delay_ms: self.fall_delay_ms,
@@ -140,18 +140,14 @@ impl Tetris for Well {
     }
 
     fn run_frame(&mut self) -> () {
-        self.current_instant = Instant::now();
-        if self.current_instant.duration_since(self.last_instant) > Duration::from_millis(self.fall_delay_ms) {
-            self.last_instant = self.current_instant;
-            println!("Current position ({},{})", self.current_tetromino.x, self.current_tetromino.y);
-            self.log_grid();
-            if self.current_tetromino.is_stuck(self.grid) && self.current_tetromino.y != 0 {
-                self.current_tetromino.stick_to_grid(&mut self.grid);
-                log::info!("Current tetromino is stuck!");
-                self.current_tetromino = get_random_tetromino();
-            } else {
-                self.move_tetromino(Direction::Down);
-            }
+        println!("Current position ({},{})", self.current_tetromino.x, self.current_tetromino.y);
+        self.log_grid();
+        if self.current_tetromino.is_stuck(self.grid) && self.current_tetromino.y != 0 {
+            self.current_tetromino.stick_to_grid(&mut self.grid);
+            log::info!("Current tetromino is stuck!");
+            self.current_tetromino = get_random_tetromino();
+        } else {
+            self.move_tetromino(Direction::Down);
         }
     }
 
