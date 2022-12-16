@@ -12,30 +12,6 @@ pub fn create_game() -> Well {
     return _well;
 }
 
-#[pyfunction]
-fn setup_game(_well: &mut Well) -> Well {
-    _well.setup();
-    return _well.clone();
-}
-
-#[pyfunction]
-fn run_frame(_well: &mut Well) -> Well {
-    _well.run_frame();
-    return _well.clone();
-}
-
-#[pyfunction]
-fn move_down(_well: &mut Well) -> Well {
-    _well.move_tetromino(Direction::Down);
-    return _well.clone();
-}
-
-#[pyfunction]
-fn quit<'py>(py: Python<'py>, obj: PyObject) -> PyResult<Well> {
-    let mut _well: Well = obj.extract::<Well>(py)?;
-    _well.quit();
-    return Ok(_well);
-}
 
 /// So in python we can do: from rust_tetris import get_well
 /// Example code: https://pyo3.rs/v0.14.5/module.html
@@ -47,9 +23,5 @@ fn quit<'py>(py: Python<'py>, obj: PyObject) -> PyResult<Well> {
 #[pyo3(name = "rust_tetris")]
 fn setup_tetris(py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(create_game, m)?)?;
-    m.add_function(wrap_pyfunction!(setup_game, m)?)?;
-    m.add_function(wrap_pyfunction!(move_down, m)?)?;
-    m.add_function(wrap_pyfunction!(run_frame, m)?)?;
-    m.add_function(wrap_pyfunction!(quit, m)?)?;
     Ok(())
 }

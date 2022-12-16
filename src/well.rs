@@ -73,6 +73,26 @@ pub fn random_direction() -> Direction {
     }
 }
 
+#[pymethods]
+impl Well {
+
+    fn setup_game(&mut self) -> () {
+        self.setup();
+    }
+
+    fn run_frame(&mut self) -> () {
+        self.run_frame();
+    }
+
+    fn move_down(&mut self) -> () {
+        self.move_tetromino(Direction::Down);
+    }
+
+    fn quit(&mut self) -> () {
+        self.quit();
+    }
+}
+
 pub trait Tetris {
     /*
     pub is implied in traits

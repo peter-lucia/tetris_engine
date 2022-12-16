@@ -1,1 +1,1 @@
-target/debug/librust_tetris.so
+target/debug/librust_tetris.dylib
