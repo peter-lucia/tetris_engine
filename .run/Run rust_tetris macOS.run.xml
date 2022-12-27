@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Run rust_tetris macOS" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
-    <option name="command" value="run --package rust_tetris --bin rust_tetris --target x86_64-apple-darwin" />
+    <option name="command" value="run --package rust_tetris --bin rust_tetris" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <option name="channel" value="DEFAULT" />
     <option name="requiredFeatures" value="true" />
