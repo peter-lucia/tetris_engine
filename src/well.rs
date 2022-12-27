@@ -80,7 +80,7 @@ impl Well {
         self.setup();
     }
 
-    fn run_frame(&mut self) -> () {
+    fn increment_frame(&mut self) -> () {
         self.run_frame();
     }
 
@@ -157,6 +157,7 @@ impl Tetris for Well {
     fn setup(&mut self) -> () {
         println!("Game Starting...");
         self.render_edges_and_stuck_pieces();
+        println!("Initialized...")
     }
 
     fn run_frame(&mut self) -> () {
@@ -269,6 +270,7 @@ impl Tetris for Well {
     }
 
     fn move_tetromino(&mut self, direction: Direction) -> () {
+        println!("Prepare to move tetromino...");
         self.render_tetromino(true);
         match direction {
             Direction::Left => {
@@ -298,6 +300,7 @@ impl Tetris for Well {
         }
         self.render_tetromino(false);
         self.render_falling_blocks();
+        println!("Moved tetromino...");
     }
 
     fn rotate_tetromino(&mut self) -> () {

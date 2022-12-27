@@ -11,7 +11,7 @@ def main():
     t.setup_game()
     while True:
         t.move_down()
-        t.run_frame()
+        t.increment_frame()
         for row in t.grid:
             print(row)
         print()
