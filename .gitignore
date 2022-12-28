@@ -4,3 +4,4 @@ HIGH_SCORE
 .DS_Store
 .idea/
 build/
+src/rust_tetris.egg-info

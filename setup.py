@@ -4,7 +4,7 @@ from setuptools_rust import Binding, RustExtension
 # docs: https://setuptools-rust.readthedocs.io/en/latest/reference.html
 
 setup(
-    name="tetris",
+    name="rust_tetris",
     version="0.1.0",
     rust_extensions=[RustExtension(target="rust_tetris",
                                    path="Cargo.toml",
