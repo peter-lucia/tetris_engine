@@ -17,17 +17,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-python@v4
-      with:
-        python-version: '3.8'
     - name: Rust Library Build
       run: cargo build --verbose
     - name: Rust Library tests
       run: cargo test --verbose
-    - name: Install Python Package Requirements
-    - run: pip install -r requirements.txt
-    - name: Build Python Package
-    - run: python setup.py build --verbose
+
+#    - uses: actions/setup-python@v4
+#      with:
+#        python-version: '3.8'
+#    - name: Install Python Package Requirements
+#    - run: pip install -r requirements.txt
+#    - name: Build Python Package
+#    - run: python setup.py build --verbose
 
   release:
     name: release ${{ matrix.target }}
