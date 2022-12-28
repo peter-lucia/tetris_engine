@@ -46,7 +46,7 @@ jobs:
             archive: zip
     steps:
     - name: Compile and release
-      uses: rust-build/rust-build.action@v1.3.2
+      uses: rust-build/rust-build.action@v1.4.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
