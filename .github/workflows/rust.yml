@@ -17,9 +17,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Build
+    - name: Rust Library Build
       run: cargo build --verbose
-    - name: Run tests
+    - name: Python Package Build
+      run: python setup.py build --verbose
+    - name: Rust Library tests
       run: cargo test --verbose
 
   release:
