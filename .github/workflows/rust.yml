@@ -22,12 +22,12 @@ jobs:
     - name: Rust Library tests
       run: cargo test --verbose
 
-    - name: Build Python Package
-    - uses: actions/checkout@v3
     - uses: actions/setup-python@v4
       with:
         python-version: '3.8'
+    - name: Install Package Requirements
     - run: pip install -r requirements.txt
+    - name: Build Python Package
     - run: python setup.py build --verbose
 
   release:
