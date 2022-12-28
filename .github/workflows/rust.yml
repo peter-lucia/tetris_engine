@@ -54,7 +54,7 @@ jobs:
         ARCHIVE_TYPES: ${{ matrix.archive }}
 
   build_python:
-    needs: build_rust
+    needs: build_rust_lib
     runs-on: ubuntu-latest
     strategy:
       matrix:
