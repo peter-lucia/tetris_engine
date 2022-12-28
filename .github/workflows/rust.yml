@@ -12,7 +12,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  rust_build:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,15 +22,13 @@ jobs:
     - name: Rust Library tests
       run: cargo test --verbose
 
-  python_build:
-    steps:
-      - name: Build Python Package
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.8'
-      - run: pip install -r requirements.txt
-      - run: python setup.py build --verbose
+    - name: Build Python Package
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+    - run: pip install -r requirements.txt
+    - run: python setup.py build --verbose
 
   release:
     name: release ${{ matrix.target }}
