@@ -28,7 +28,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Rust Binary Build
-      run: cargo build --bin --verbose
+      run: cargo build --bin rust_tetris --verbose
 
   release_rust_bin:
     needs: build_rust_bin
