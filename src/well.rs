@@ -88,6 +88,22 @@ impl Well {
         self.move_tetromino(Direction::Down);
     }
 
+    fn move_left(&mut self) -> () {
+        self.move_tetromino(Direction::Left);
+    }
+
+    fn move_right(&mut self) -> () {
+        self.move_tetromino(Direction::Right);
+    }
+
+    fn rotate_left(&mut self) -> () {
+        self.rotate_tetromino(true)
+    }
+
+    fn rotate_right(&mut self) -> () {
+        self.rotate_tetromino(false)
+    }
+
     fn quit(&mut self) -> () {
         self.quit();
     }
@@ -112,7 +128,7 @@ pub trait Tetris {
     fn setup(&mut self) -> ();
     fn run_frame(&mut self) -> ();
     fn simulate_game(&mut self) -> ();
-    fn rotate_tetromino(&mut self) -> ();
+    fn rotate_tetromino(&mut self, reverse: bool) -> ();
 }
 
 
@@ -303,11 +319,13 @@ impl Tetris for Well {
         println!("Moved tetromino...");
     }
 
-    fn rotate_tetromino(&mut self) -> () {
+    /// Rotates as many times until no collision happens,
+    /// which can be 360 degrees, where no rotation is possible.
+    fn rotate_tetromino(&mut self, reverse: bool) -> () {
         self.render_tetromino(true);
         let mut i = 0;
         loop {
-            self.current_tetromino.rotate(false);
+            self.current_tetromino.rotate(reverse);
             if (!self.current_tetromino
                 .will_collide(self.grid, 0, 0)) || i == 4 {
                 break;
