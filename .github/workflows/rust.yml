@@ -12,7 +12,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  build_rust:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,6 +24,7 @@ jobs:
 
 
   release:
+    needs: build_rust
     name: release ${{ matrix.target }}
     runs-on: ubuntu-latest
     strategy:
@@ -47,6 +48,7 @@ jobs:
           ARCHIVE_TYPES: ${{ matrix.archive }}
 
   build2:
+    needs: build_rust
     runs-on: ubuntu-latest
     strategy:
       matrix:
