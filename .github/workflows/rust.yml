@@ -46,8 +46,11 @@ jobs:
             archive: zip
     steps:
     - uses: actions/checkout@master
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
     - name: Compile and release
-      uses: rust-build/rust-build.action@v1.3.2
+      uses: rust-build/rust-build.action@1.4.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
