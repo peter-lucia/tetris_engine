@@ -12,7 +12,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build_rust:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -46,14 +46,24 @@ jobs:
           RUSTTARGET: ${{ matrix.target }}
           ARCHIVE_TYPES: ${{ matrix.archive }}
 
-  build_python:
+  build2:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
 
     steps:
-    - uses: actions/setup-python@v4
-      with:
-        python-version: '3.8'
-    - name: Install Python Package Requirements
-    - run: pip install -r requirements.txt
-    - name: Build Python Package
-    - run: python setup.py build --verbose
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+#      - name: Test with pytest
+#        run: |
+#          pytest
+      - name: Build Python Package
+      - run: python setup.py build --verbose
