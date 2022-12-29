@@ -104,7 +104,7 @@ impl Well {
         self.rotate_tetromino(false)
     }
 
-    fn quit(&mut self) -> () {
+    fn exit(&mut self) -> () {
         self.quit();
     }
 }
@@ -126,7 +126,7 @@ pub trait Tetris {
     fn log_grid(&self) -> ();
     fn quit(&mut self) -> ();
     fn setup(&mut self) -> ();
-    fn run_frame(&mut self) -> ();
+    fn run_frame(&mut self) -> bool;
     fn simulate_game(&mut self) -> ();
     fn rotate_tetromino(&mut self, reverse: bool) -> ();
 }
@@ -176,22 +176,26 @@ impl Tetris for Well {
         println!("Initialized...")
     }
 
-    fn run_frame(&mut self) -> () {
+    fn run_frame(&mut self) -> bool {
         println!("Current position ({},{})", self.current_tetromino.x, self.current_tetromino.y);
         self.log_grid();
         if self.current_tetromino.is_stuck(self.grid) && self.current_tetromino.y != 0 {
             self.current_tetromino.stick_to_grid(&mut self.grid);
             log::info!("Current tetromino is stuck!");
             self.current_tetromino = get_random_tetromino();
-        } else {
+        } else if self.current_tetromino.is_stuck(self.grid) && self.current_tetromino.y == 0 {
+            return false;
+        }
+        else {
             self.move_tetromino(Direction::Down);
         }
+        return true;
     }
 
     fn simulate_game(&mut self) -> () {
         self.setup();
         while self.running {
-            self.run_frame();
+            self.running = self.run_frame();
         }
         self.quit();
     }
