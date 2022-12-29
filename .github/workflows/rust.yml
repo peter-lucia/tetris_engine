@@ -56,6 +56,7 @@ jobs:
       with:
         RUSTTARGET: ${{ matrix.target }}
         ARCHIVE_TYPES: ${{ matrix.archive }}
+        PRE_BUILD: "pre_build.sh"
 
   build_python:
     needs: build_rust_lib
