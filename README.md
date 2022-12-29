@@ -1,8 +1,11 @@
 # Tetris
-* A tetris game engine built with rust and made available as a python library
-* Can be used with your python GUI library of choice
+* A tetris game engine built with rust
 
-### Getting started
+Capabilities
+
+* Use with your Python or Rust GUI library of choice
+
+### Python Library - Getting started
 ```bash
 pip install git+ssh://git@github.com/peter-lucia/rust_tetris@python-lib
 ```
@@ -28,3 +31,25 @@ if __name__ == '__main__':
     main()
 ```
 
+### Rust Crate (Binary)
+
+Simulate a game
+
+```bash
+cargo run --bin rust_tetris
+```
+
+### Rust Crate (Library)
+
+Build the library only
+
+```bash
+cargo build --lib rust_tetris
+```
+
+### TODO
+- [ ] Game engine available for rust
+- [ ] Crate available for rust
+- [ ] Python package available from pypi
+- [x] Build pipeline - cross-compile for mac, windows, linux
+- [x] Python package available from git
