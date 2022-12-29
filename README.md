@@ -48,7 +48,6 @@ cargo build --lib rust_tetris
 ```
 
 ### TODO
-- [ ] Game engine available for rust
 - [ ] Crate available for rust
 - [ ] Python package available from pypi
 - [x] Build pipeline - cross-compile for mac, windows, linux
