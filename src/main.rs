@@ -1,38 +1,18 @@
+use std::borrow::{Borrow, BorrowMut};
+use std::rc::Rc;
+use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::Duration;
+use crate::well::{Tetris, Well};
+
 mod tetromino;
 mod well;
 
-use std::io::{stdout, Write};
-use crossterm::{
-    ExecutableCommand, QueueableCommand,
-    terminal,
-    cursor,
-    style::{self, Stylize},
-    Result,
-};
-use well::{Well, BoardCommandLine};
-use std::{io, thread, error::Error};
-use log::LevelFilter;
-use log4rs::append::file::FileAppender;
-use log4rs::encode::pattern::PatternEncoder;
-use log4rs::config::{Appender, Config, Root};
 
-fn main() -> Result<()> {
+fn main() {
+    let mut t: Well = Tetris::new();
+    t.simulate_game();
 
-    let logfile = FileAppender::builder()
-        .encoder(Box::new(PatternEncoder::new("{l} - {m}\n")))
-        .build("log/output.log")?;
-
-    let config = Config::builder()
-        .appender(Appender::builder().build("logfile", Box::new(logfile)))
-        .build(Root::builder()
-                   .appender("logfile")
-                   .build(LevelFilter::Info)).unwrap();
-
-    log4rs::init_config(config).unwrap();
-
-    terminal::enable_raw_mode();
-    let mut board: Well = BoardCommandLine::new();
-    board.run();
-    terminal::disable_raw_mode();
-    Ok(())
 }
+
+

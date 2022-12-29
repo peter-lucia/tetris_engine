@@ -1,14 +1,55 @@
 # Tetris
-My command line implementation of tetris in rust
+* A tetris game engine built with rust
 
-![Tetris](images/game5.gif)
+Capabilities
 
-### Getting started
-1. Clone this repo
-2. `cargo run`
-3. Controls 
-  * Use the arrow keys or 'w', 's', and 'd' to move 'Left', 'Down' or 'Right'
-  * Or use vim keybindings to move a tetromino left (h), right (l), and down (j)
-  * Press 'Spacebar' or 'r' to rotate a tetromino
-  * Press 'q' to quit
-  * The highest score is saved to HIGH_SCORE
+* Use with your Python or Rust GUI library of choice
+
+### Python Library - Getting started
+```bash
+pip install git+ssh://git@github.com/peter-lucia/rust_tetris@python-lib
+```
+
+```python
+def show_board(t):
+    for row in t.grid:
+        print(row)
+    print()
+
+    
+def main():
+    t = create_game()
+    show_board(t)
+    t.setup_game()
+    show_board(t)
+    t.move_down()
+    t.increment_frame()
+    show_board(t)
+
+
+if __name__ == '__main__':
+    main()
+```
+
+### Rust Crate (Binary)
+
+Simulate a game
+
+```bash
+cargo run --bin rust_tetris
+```
+
+### Rust Crate (Library)
+
+Build the library only
+
+```bash
+cargo build --lib rust_tetris
+```
+
+### TODO
+- [ ] Game engine available for rust
+- [ ] Crate available for rust
+- [ ] Python package available from pypi
+- [x] Build pipeline - cross-compile for mac, windows, linux
+- [x] Python package available from git

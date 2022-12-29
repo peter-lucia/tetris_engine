@@ -18,6 +18,16 @@ pub struct Tetromino {
     pub y: usize,
 }
 
+impl Clone for Tetromino {
+    fn clone(&self) -> Self {
+        Tetromino {
+            area: self.area,
+            x: self.x,
+            y: self.y,
+        }
+    }
+}
+
 impl Tetromino {
     pub fn rotate(&mut self, reverse: bool) -> () {
         if reverse {
