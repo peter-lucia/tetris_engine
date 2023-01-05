@@ -48,7 +48,10 @@ cargo build --lib rust_tetris
 ```
 
 ### TODO
+- [ ] Multiplayer capability
+- [ ] Web-based UI (Javascript, WASM)
 - [ ] Crate available for rust
 - [ ] Python package available from pypi
+- [ ] Command line UI (Python)
 - [x] Build pipeline - cross-compile for mac, windows, linux
 - [x] Python package available from git
