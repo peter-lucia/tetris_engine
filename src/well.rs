@@ -38,6 +38,7 @@ fn get_y_offset() -> usize {
 }
 
 /// https://pyo3.rs/main/class.html
+#[cfg(feature = "python-lib")]
 #[pyclass]
 pub struct Well {
     current_instant: Instant,
@@ -53,6 +54,19 @@ pub struct Well {
     #[pyo3(get, set)]
     pub fall_delay_min_ms: u64,
     #[pyo3(get, set)]
+    pub fall_delay_delta: u64,
+}
+
+#[cfg(feature = "wasm")]
+pub struct Well {
+    current_instant: Instant,
+    last_instant: Instant,
+    pub grid: [[i32; WELL_WIDTH]; WELL_HEIGHT],
+    pub current_tetromino: Tetromino,
+    pub score: i32,
+    pub running: bool,
+    pub fall_delay_ms: u64,
+    pub fall_delay_min_ms: u64,
     pub fall_delay_delta: u64,
 }
 
@@ -73,6 +87,7 @@ pub fn random_direction() -> Direction {
     }
 }
 
+#[cfg(feature = "python-lib")]
 #[pymethods]
 impl Well {
 

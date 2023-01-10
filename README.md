@@ -50,5 +50,6 @@ cargo build --lib rust_tetris
 ### TODO
 - [ ] Crate available for rust
 - [ ] Python package available from pypi
+- [ ] Javascript accessible via wasm [source](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm)
 - [x] Build pipeline - cross-compile for mac, windows, linux
 - [x] Python package available from git
