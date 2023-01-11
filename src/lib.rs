@@ -4,9 +4,10 @@ mod well;
 use std::borrow::{Borrow, BorrowMut};
 use well::{Tetris};
 use crate::well::{Direction, Well};
+#[cfg(all(feature = "python-lib", not(feature="wasm")))]
 use pyo3::{prelude::*, wrap_pyfunction};
 
-#[cfg(feature = "python-lib")]
+#[cfg(all(feature = "python-lib", not(feature="wasm")))]
 #[pyfunction]
 pub fn create_game() -> Well {
     let mut _well: Well = Tetris::new();
@@ -21,7 +22,7 @@ pub fn create_game() -> Well {
 /// https://doc.rust-lang.org/reference/lifetime-elision.html#lifetime-elision-in-functions
 /// https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html
 
-#[cfg(feature = "python-lib")]
+#[cfg(all(feature = "python-lib", not(feature="wasm")))]
 #[pymodule]
 #[pyo3(name = "rust_tetris")]
 fn setup_tetris(py: Python<'_>, m: &PyModule) -> PyResult<()> {

@@ -12,6 +12,7 @@ use std::any::Any;
 use std::future::Future;
 use std::ops::DerefMut;
 use std::path::Path;
+#[cfg(all(feature = "python-lib", not(feature="wasm")))]
 use pyo3::prelude::*;
 
 pub const WELL_WIDTH: usize = 14;
@@ -38,7 +39,8 @@ fn get_y_offset() -> usize {
 }
 
 /// https://pyo3.rs/main/class.html
-#[cfg(feature = "python-lib")]
+/// https://doc.rust-lang.org/reference/conditional-compilation.html
+#[cfg(all(feature = "python-lib", not(feature="wasm")))]
 #[pyclass]
 pub struct Well {
     current_instant: Instant,
@@ -57,7 +59,7 @@ pub struct Well {
     pub fall_delay_delta: u64,
 }
 
-#[cfg(feature = "wasm")]
+// #[cfg(all(feature = "wasm", not(feature="python-lib")))]
 pub struct Well {
     current_instant: Instant,
     last_instant: Instant,
@@ -87,7 +89,7 @@ pub fn random_direction() -> Direction {
     }
 }
 
-#[cfg(feature = "python-lib")]
+#[cfg(all(feature = "python-lib", not(feature="wasm")))]
 #[pymethods]
 impl Well {
 
