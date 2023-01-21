@@ -9,7 +9,7 @@ edition = "2021"
 rand = "0.8.5"
 getrandom = { version = "0.2", features = ["js"] }  # to build for wasm
 log = "0.4"
-env_logger = "0.9"
+env_logger = "0.10.0"
 wasm-bindgen = "0.2"
 pyo3 = {version = "0.17.3", features = ["extension-module", "generate-import-lib", "abi3"], optional=true}
 

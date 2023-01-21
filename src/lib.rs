@@ -6,6 +6,7 @@ use well::{Tetris};
 use crate::well::{Direction, Well};
 #[cfg(all(feature = "python-lib", not(feature="wasm")))]
 use pyo3::{prelude::*, wrap_pyfunction};
+use wasm_bindgen::prelude::wasm_bindgen;
 
 #[cfg(all(feature = "python-lib", not(feature="wasm")))]
 #[pyfunction]
@@ -28,4 +29,10 @@ pub fn create_game() -> Well {
 fn setup_tetris(py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(create_game, m)?)?;
     Ok(())
+}
+
+#[wasm_bindgen]
+pub fn create_game() -> Well {
+    let mut _well: Well = Tetris::new();
+    return _well;
 }
