@@ -50,10 +50,11 @@ fn move_right(id: &RawStr) -> String {
     // must clone the original reference
     let mut well: Well = guard.get(&unique_id).cloned().unwrap();
     well.move_right();
-    // update the active games
+    // create the json response
     let result = serde_json::to_string(&well).unwrap();
+    // update the active games
     guard.insert(unique_id, well);
-    result
+    return result;
 }
 
 fn rotate_left() -> () {
@@ -68,5 +69,5 @@ fn reset() -> () {
 #[launch]
 fn rocket() -> _ {
     rocket::build()
-        .mount("/", routes![default, setup_game])
+        .mount("/", routes![default, setup_game, move_right])
 }

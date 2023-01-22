@@ -14,6 +14,7 @@ use std::ops::DerefMut;
 use std::path::Path;
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
+use uuid::{Uuid, uuid};
 
 
 pub const WELL_WIDTH: usize = 14;
@@ -30,6 +31,7 @@ fn get_y_offset() -> usize {
 
 #[derive(Serialize, Deserialize)]
 pub struct Well {
+    pub id: String,
     #[serde(skip, default="Instant::now")]
     current_instant: Instant,
     #[serde(skip, default="Instant::now")]
@@ -124,6 +126,7 @@ pub trait Tetris {
 impl Clone for Well {
     fn clone(&self) -> Self {
         Well {
+            id: Uuid::new_v4().to_string(),
             current_instant: self.current_instant,
             last_instant: self.last_instant,
             grid: self.grid,
@@ -143,6 +146,7 @@ impl Tetris for Well {
         let mut result = Well {
             // |<---------- 12 --------->| plus 2 chars to display edge of wells = 14 x 20
             // where the well is of height 18 with two lines for the top (if needed) and bottom
+            id: Uuid::new_v4().to_string(),
             grid: [[0; WELL_WIDTH]; WELL_HEIGHT],
             current_instant: Instant::now(),
             last_instant: Instant::now(),
