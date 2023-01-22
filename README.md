@@ -23,5 +23,6 @@ cargo build --lib rust_tetris
 
 ### TODO
 - [ ] Crate available for rust
-- [ ] API interface
+- [ ] Direct html/css/js rendering from rust using rocket
+- [ ] Maybe: API interface
 - [x] Build pipeline - cross-compile for mac, windows, linux
