@@ -12,26 +12,13 @@ use std::any::Any;
 use std::future::Future;
 use std::ops::DerefMut;
 use std::path::Path;
-#[cfg(all(feature = "python-lib", not(feature="wasm")))]
-use pyo3::prelude::*;
-use wasm_bindgen::convert::IntoWasmAbi;
-use wasm_bindgen::describe::WasmDescribe;
-use wasm_bindgen::prelude::wasm_bindgen;
+use serde::{Deserialize, Serialize};
+use serde_json::Result;
+
 
 pub const WELL_WIDTH: usize = 14;
 pub const WELL_HEIGHT: usize = 20;
 const HIGH_SCORE_FILENAME: &str = "HIGH_SCORE";
-
-macro_rules! cmdline_color_white {
-    () => {
-        "█".white();
-    }
-}
-macro_rules! cmdline_color_black {
-    () => {
-        " ".black();
-    }
-}
 
 fn get_x_offset() -> usize {
     return 0;
@@ -41,33 +28,14 @@ fn get_y_offset() -> usize {
     return 0;
 }
 
-/// https://pyo3.rs/main/class.html
-/// https://doc.rust-lang.org/reference/conditional-compilation.html
-#[cfg(all(feature = "python-lib", not(feature="wasm")))]
-#[pyclass]
+#[derive(Serialize, Deserialize)]
 pub struct Well {
+    #[serde(skip, default="Instant::now")]
     current_instant: Instant,
-    last_instant: Instant,
-    #[pyo3(get, set)]
-    pub grid: [[i32; WELL_WIDTH]; WELL_HEIGHT],
-    pub current_tetromino: Tetromino,
-    #[pyo3(get, set)]
-    pub score: i32,
-    pub running: bool,
-    #[pyo3(get, set)]
-    pub fall_delay_ms: u64,
-    #[pyo3(get, set)]
-    pub fall_delay_min_ms: u64,
-    #[pyo3(get, set)]
-    pub fall_delay_delta: u64,
-}
-
-#[cfg(all(feature = "wasm", not(feature="python-lib")))]
-#[wasm_bindgen]
-pub struct Well {
-    current_instant: Instant,
+    #[serde(skip, default="Instant::now")]
     last_instant: Instant,
     pub grid: [[i32; WELL_WIDTH]; WELL_HEIGHT],
+    #[serde(skip)]
     pub current_tetromino: Tetromino,
     pub score: i32,
     pub running: bool,
@@ -76,19 +44,6 @@ pub struct Well {
     pub fall_delay_delta: u64,
 }
 
-impl IntoWasmAbi for Well {
-    type Abi = i32;
-
-    fn into_abi(self) -> Self::Abi {
-        return self;
-    }
-
-}
-
-// impl WasmDescribe for Well {
-//     fn describe() -> () {
-//     }
-// }
 
 pub enum Direction {
     Up,
@@ -107,9 +62,11 @@ pub fn random_direction() -> Direction {
     }
 }
 
-#[cfg(all(feature = "python-lib", not(feature="wasm")))]
-#[pymethods]
 impl Well {
+
+    fn get_default_instant() -> Instant {
+        return Instant::now();
+    }
 
     fn setup_game(&mut self) -> () {
         self.setup();
@@ -144,42 +101,6 @@ impl Well {
     }
 }
 
-// #[cfg(all(feature = "wasm", not(feature="python-lib")))]
-#[wasm_bindgen]
-impl Well {
-
-    #[wasm_bindgen(constructor)]
-    pub fn new() -> Well {
-        Well {
-            grid: [[0; WELL_WIDTH]; WELL_HEIGHT],
-            current_instant: Instant::now(),
-            last_instant: Instant::now(),
-            current_tetromino: get_random_tetromino(),
-            score: 0,
-            running: true,
-            fall_delay_ms: 1000,
-            fall_delay_min_ms: 100,
-            fall_delay_delta: 50,
-        }
-    }
-
-     #[wasm_bindgen(getter)]
-    pub fn get_grid(&self) -> [[i32; WELL_WIDTH]; WELL_HEIGHT] {
-        self.grid
-
-    }
-
-    #[wasm_bindgen(getter)]
-    pub fn get_score(&self) -> i32 {
-        self.score
-    }
-
-    #[wasm_bindgen(getter)]
-    pub fn get_running(&self) -> bool {
-        self.running
-    }
-
-}
 
 pub trait Tetris {
     /*
