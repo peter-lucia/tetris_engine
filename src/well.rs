@@ -64,27 +64,23 @@ pub fn random_direction() -> Direction {
 
 impl Well {
 
-    fn get_default_instant() -> Instant {
-        return Instant::now();
-    }
-
-    fn setup_game(&mut self) -> () {
+    pub fn setup_game(&mut self) -> () {
         self.setup();
     }
 
-    fn increment_frame(&mut self) -> () {
+    pub fn increment_frame(&mut self) -> () {
         self.run_frame();
     }
 
-    fn move_down(&mut self) -> () {
+    pub fn move_down(&mut self) -> () {
         self.move_tetromino(Direction::Down);
     }
 
-    fn move_left(&mut self) -> () {
+    pub fn move_left(&mut self) -> () {
         self.move_tetromino(Direction::Left);
     }
 
-    fn move_right(&mut self) -> () {
+    pub fn move_right(&mut self) -> () {
         self.move_tetromino(Direction::Right);
     }
 
