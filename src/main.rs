@@ -31,11 +31,10 @@ fn default() -> &'static str {
 
 #[post("/game")]
 fn setup_game() -> String {
-    let mut map = ACTIVE_GAMES.lock().unwrap();
+    let mut map: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
     let mut t: Well = Tetris::new();
-    let id = Uuid::new_v4();
     let serialized = serde_json::to_string(&t).unwrap();
-    map.insert(id.to_string(), t);
+    map.insert(t.id.clone(), t);
     return serialized;
 }
 
@@ -48,19 +47,23 @@ fn move_left() -> String {
 fn move_right(req: &str) -> String {
 
     let binding: serde_json::Value = serde_json::from_str(req).unwrap();
-    let id = binding.get("id").unwrap();
+    let id: String = binding.get("id").unwrap().as_str().unwrap().to_string();
     let mut hashmap_guard: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
-    if hashmap_guard.get(id.to_string().as_str()).is_none() {
+    for k in hashmap_guard.keys() {
+        log::info!("{k}", k=k);
+    }
+    if !hashmap_guard.contains_key(&id) {
         log::info!("Missing id {id}", id=id);
         return json!({
             "status": format!("Missing id: {id}", id = id),
             "data": {
                 "id": id,
+                "hashmap size": hashmap_guard.len(),
             }
         }).to_string();
     }
     // must clone the original reference
-    let mut well: Well = hashmap_guard.get(&id.to_string()).cloned().unwrap();
+    let mut well: Well = hashmap_guard.get(&id).cloned().unwrap();
     well.move_right();
     // create the json response
     let result = serde_json::to_string(&well).unwrap();
