@@ -35,5 +35,6 @@ fn create_game() -> String {
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![default])
+    rocket::build()
+        .mount("/", routes![default, create_game])
 }
