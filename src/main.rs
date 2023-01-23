@@ -15,25 +15,62 @@ mod tetromino;
 mod well;
 mod util;
 
+use rocket::response::stream::{Event, EventStream};
+use rocket::tokio::time::{self, Duration};
 
 #[get("/")]
 fn default() -> &'static str {
     "You've reached the rust_tetris homepage!"
 }
-///
-/// Display all active games on the page
 
-#[post("/game")]
-fn setup_game() -> String {
+fn run_with_mutex_mut<T>(id: String, func: &dyn Fn(&mut Well) -> T) -> T {
     let mut map: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
-    let mut t: Well = Tetris::new();
-    let serialized = serde_json::to_string(&t).unwrap();
-    map.insert(t.id.clone(), t);
-    return serialized;
+    let mut game: Well = map.get(&id.clone()).cloned().unwrap();
+    let res = func(&mut game);
+    map.insert(game.id.clone(), game.clone());
+    std::mem::drop(map);
+    return res;
 }
 
-/// Moves the current tetromino right
-/// req: json data encoded as a str reference that contains the game id to modify
+fn read_game(id: String) -> Well {
+    let map: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
+    let game: Well = map.get(&id.clone()).cloned().unwrap();
+    std::mem::drop(map);
+    return game;
+}
+
+/// Create a new game
+#[post("/game")]
+fn setup_game() -> EventStream![] {
+    let mut map: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
+    let mut t: Well = Tetris::new();
+    let id: String = t.id.clone();
+    let serialized = serde_json::to_string(&t).unwrap();
+    map.insert(t.id.clone(),t.clone());
+    let mut game: Well = map.get(&t.id.clone()).cloned().unwrap();
+    std::mem::drop(map);
+    EventStream! {
+        run_with_mutex_mut(id.clone(), &Well::setup);
+        let mut interval = time::interval(Duration::from_millis(game.fall_delay_ms));
+        let mut running = true;
+        while running {
+            running = run_with_mutex_mut(id.clone(), &Well::run_frame);
+            let t: Well = read_game(id.clone());
+            t.log_grid();
+            let game_state = serde_json::to_string(&t).unwrap();
+            yield Event::data(game_state);
+            interval.tick().await;
+        }
+        run_with_mutex_mut(id.clone(), &Well::quit);
+    }
+}
+
+/// Move the tetromino
+/// Body Params:
+/// {
+///     "id": "1c582c72-e3dc-4999-a9f4-b5bc1fdfb394",
+///     "direction": "left"
+/// }
 #[put("/move_tetromino", data = "<req>")]
 fn move_tetromino(req: &str) -> String {
     let id: Option<String> = util::extract_id(req);
@@ -57,8 +94,12 @@ fn move_tetromino(req: &str) -> String {
     return result;
 }
 
-/// Moves the current tetromino left
-/// req: json data encoded as a str reference that contains the game id to modify
+/// Rotate the tetromino
+/// Body Params:
+/// {
+///     "id": "1c582c72-e3dc-4999-a9f4-b5bc1fdfb394",
+///     "reverse": true
+/// }
 #[put("/rotate_tetromino", data = "<req>")]
 fn rotate_tetromino(req: &str) -> String {
     let id: Option<String> = util::extract_id(req);

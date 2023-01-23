@@ -166,7 +166,7 @@ impl Tetris for Well {
     fn setup(&mut self) -> () {
         println!("Game Starting...");
         self.render_edges_and_stuck_pieces();
-        env_logger::init();
+        // env_logger::init();
         println!("Initialized...")
     }
 
