@@ -1,8 +1,8 @@
 use serde_json::{json, to_string};
 use serde_json;
-use std::sync::{Arc, Mutex, MutexGuard};
+use std::sync::{Mutex, MutexGuard};
 use std::collections::HashMap;
-use crate::well::{Tetris, Well, WELL_HEIGHT, WELL_WIDTH};
+use crate::well::{Well};
 
 lazy_static! {
     pub static ref ACTIVE_GAMES: Mutex<HashMap<String, Well>> = {

@@ -1,19 +1,16 @@
-use std::borrow::{Borrow, BorrowMut};
-use std::rc::Rc;
-use std::sync::{Arc, Mutex, MutexGuard};
-use std::thread;
-use std::time::Duration;
-use crate::well::{Tetris, Well, WELL_HEIGHT, WELL_WIDTH};
-use serde_json::{json, to_string};
-use serde_json;
-use uuid::{Uuid, uuid};
-use std::collections::HashMap;
-use rocket::http::RawStr;
-use util::ACTIVE_GAMES;
-#[macro_use]
-extern crate rocket;
 #[macro_use]
 extern crate lazy_static;
+#[macro_use]
+extern crate rocket;
+
+use std::collections::HashMap;
+use std::sync::MutexGuard;
+
+use serde_json;
+use util::ACTIVE_GAMES;
+
+use crate::well::{Tetris, Well};
+
 mod tetromino;
 mod well;
 mod util;
