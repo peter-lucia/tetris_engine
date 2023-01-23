@@ -34,8 +34,8 @@ fn setup_game() -> String {
 
 /// Moves the current tetromino right
 /// req: json data encoded as a str reference that contains the game id to modify
-#[post("/move", data = "<req>")]
-fn _move(req: &str) -> String {
+#[put("/move_tetromino", data = "<req>")]
+fn move_tetromino(req: &str) -> String {
     let id: Option<String> = util::extract_id(req);
     if id.is_none() {
         return util::get_response_missing_id_json(req);
@@ -59,8 +59,8 @@ fn _move(req: &str) -> String {
 
 /// Moves the current tetromino left
 /// req: json data encoded as a str reference that contains the game id to modify
-#[post("/rotate", data = "<req>")]
-fn rotate(req: &str) -> String {
+#[put("/rotate_tetromino", data = "<req>")]
+fn rotate_tetromino(req: &str) -> String {
     let id: Option<String> = util::extract_id(req);
     if id.is_none() {
         return util::get_response_missing_id_json(req);
@@ -89,5 +89,5 @@ fn reset() -> () {
 #[launch]
 fn rocket() -> _ {
     rocket::build()
-        .mount("/", routes![default, setup_game, _move])
+        .mount("/", routes![default, setup_game, move_tetromino, rotate_tetromino])
 }
