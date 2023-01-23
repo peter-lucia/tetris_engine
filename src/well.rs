@@ -126,7 +126,7 @@ pub trait Tetris {
 impl Clone for Well {
     fn clone(&self) -> Self {
         Well {
-            id: Uuid::new_v4().to_string(),
+            id: self.id.to_string(),
             current_instant: self.current_instant,
             last_instant: self.last_instant,
             grid: self.grid,

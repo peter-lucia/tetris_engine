@@ -1,4 +1,4 @@
-use serde_json::{json, to_string};
+use serde_json::{json};
 use serde_json;
 use std::sync::{Mutex, MutexGuard};
 use std::collections::HashMap;
@@ -13,7 +13,7 @@ lazy_static! {
 
 
 pub fn extract_id(req: &str) -> Option<String> {
-    let mut hashmap_guard: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
+    let hashmap_guard: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
     let binding: serde_json::Value = serde_json::from_str(req).unwrap();
     let id: String = binding.get("id").unwrap().as_str().unwrap().to_string();
     if !hashmap_guard.contains_key(&id) {

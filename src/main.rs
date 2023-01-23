@@ -27,6 +27,7 @@ fn run_with_mutex_mut<T>(id: String, func: &dyn Fn(&mut Well) -> T) -> T {
     let mut map: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
     let mut game: Well = map.get(&id.clone()).cloned().unwrap();
     let res = func(&mut game);
+    game.log_grid();
     map.insert(game.id.clone(), game.clone());
     std::mem::drop(map);
     return res;
@@ -45,7 +46,6 @@ fn setup_game() -> EventStream![] {
     let mut map: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
     let mut t: Well = Tetris::new();
     let id: String = t.id.clone();
-    let serialized = serde_json::to_string(&t).unwrap();
     map.insert(t.id.clone(),t.clone());
     let mut game: Well = map.get(&t.id.clone()).cloned().unwrap();
     std::mem::drop(map);
@@ -54,9 +54,10 @@ fn setup_game() -> EventStream![] {
         let mut interval = time::interval(Duration::from_millis(game.fall_delay_ms));
         let mut running = true;
         while running {
+            run_with_mutex_mut(id.clone(), &Well::move_down);
             running = run_with_mutex_mut(id.clone(), &Well::run_frame);
             let t: Well = read_game(id.clone());
-            t.log_grid();
+            // t.log_grid();
             let game_state = serde_json::to_string(&t).unwrap();
             yield Event::data(game_state);
             interval.tick().await;
