@@ -86,15 +86,15 @@ impl Well {
         self.move_tetromino(Direction::Right);
     }
 
-    fn rotate_left(&mut self) -> () {
+    pub fn rotate_left(&mut self) -> () {
         self.rotate_tetromino(true)
     }
 
-    fn rotate_right(&mut self) -> () {
+    pub fn rotate_right(&mut self) -> () {
         self.rotate_tetromino(false)
     }
 
-    fn exit(&mut self) -> () {
+    pub fn exit(&mut self) -> () {
         self.quit();
     }
 }
