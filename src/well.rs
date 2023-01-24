@@ -178,6 +178,7 @@ impl Tetris for Well {
             log::info!("Current tetromino is stuck!");
             self.current_tetromino = get_random_tetromino();
         } else if self.current_tetromino.is_stuck(self.grid) && self.current_tetromino.y == 0 {
+            log::info!("Game Over!");
             return false;
         }
         else {

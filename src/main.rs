@@ -23,7 +23,7 @@ use rocket::fairing::{Fairing, Info, Kind};
 
 #[get("/")]
 fn default() -> &'static str {
-    "You've reached the rust_tetris homepage!"
+    "You've reached the rust_tetris API homepage!"
 }
 
 fn run_with_mutex_mut<T>(id: String, func: &dyn Fn(&mut Well) -> T) -> T {
@@ -64,7 +64,7 @@ fn start_game() -> EventStream![] {
             yield Event::data(game_state);
             interval.tick().await;
         }
-        run_with_mutex_mut(id.clone(), &Well::quit);
+        run_with_mutex_mut(id.clone(), &Well::exit);
     }
 }
 
