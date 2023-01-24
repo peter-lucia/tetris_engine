@@ -17,6 +17,9 @@ mod util;
 
 use rocket::response::stream::{Event, EventStream};
 use rocket::tokio::time::{self, Duration};
+use rocket::http::Header;
+use rocket::{Request, Response};
+use rocket::fairing::{Fairing, Info, Kind};
 
 #[get("/")]
 fn default() -> &'static str {
@@ -41,8 +44,8 @@ fn read_game(id: String) -> Well {
 }
 
 /// Create a new game
-#[post("/game")]
-fn setup_game() -> EventStream![] {
+#[get("/game")]
+fn start_game() -> EventStream![] {
     let mut map: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
     let mut t: Well = Tetris::new();
     let id: String = t.id.clone();
@@ -57,7 +60,6 @@ fn setup_game() -> EventStream![] {
             run_with_mutex_mut(id.clone(), &Well::move_down);
             running = run_with_mutex_mut(id.clone(), &Well::run_frame);
             let t: Well = read_game(id.clone());
-            // t.log_grid();
             let game_state = serde_json::to_string(&t).unwrap();
             yield Event::data(game_state);
             interval.tick().await;
@@ -128,8 +130,30 @@ fn rotate_tetromino(req: &str) -> String {
 fn reset() -> () {
 }
 
+/*
+CORS Handling
+ */
+pub struct CORS;
+
+#[rocket::async_trait]
+impl Fairing for CORS {
+    fn info(&self) -> Info {
+        Info {
+            name: "Add CORS headers to responses",
+            kind: Kind::Response
+        }
+    }
+
+    async fn on_response<'r>(&self, _request: &'r Request<'_>, response: &mut Response<'r>) {
+        response.set_header(Header::new("Access-Control-Allow-Origin", "*"));
+        response.set_header(Header::new("Access-Control-Allow-Methods", "POST, GET, PATCH, OPTIONS"));
+        response.set_header(Header::new("Access-Control-Allow-Headers", "*"));
+        response.set_header(Header::new("Access-Control-Allow-Credentials", "true"));
+    }
+}
+
 #[launch]
 fn rocket() -> _ {
     rocket::build()
-        .mount("/", routes![default, setup_game, move_tetromino, rotate_tetromino])
+        .mount("/", routes![default, start_game, move_tetromino, rotate_tetromino]).attach(CORS)
 }
