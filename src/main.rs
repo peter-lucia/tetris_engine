@@ -38,7 +38,7 @@ fn run_with_mutex_mut<T>(id: String, func: &dyn Fn(&mut Well) -> T) -> T {
     return res;
 }
 
-fn stop_game(id: String) -> () {
+fn remove_game(id: String) -> () {
     // the mutex is scoped so we don't actually have to manually remove it
     let mut map: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
     map.remove(&id.clone());
@@ -57,7 +57,7 @@ fn new_game() -> String {
     log::info!("Starting setup of new game");
     let mut map: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
     let mut w: Well = Tetris::new();
-    w.fall_delay_ms = 100;
+    w.fall_delay_ms = 1000;
     let id: String = w.id.clone();
     map.insert(w.id.clone(),w.clone());
     std::mem::drop(map);
@@ -77,6 +77,7 @@ fn start_game() -> EventStream![] {
     }
     log::info!("Map is empty: {map_is_empty}", map_is_empty=map_is_empty);
     std::mem::drop(map);
+    let mut interval = time::interval(Duration::from_millis(read_game(id.clone()).fall_delay_ms));
     EventStream! {
         if id != "".to_string() {
             let mut running = read_game(id.clone()).running;
@@ -85,19 +86,16 @@ fn start_game() -> EventStream![] {
                 running = run_with_mutex_mut(id.clone(), &Well::run_frame);
                 let w: Well = read_game(id.clone());
                 let game_state = serde_json::to_string(&w).unwrap();
-                yield Event::data(game_state);
                 interval.tick().await;
-                interval = time::interval(Duration::from_millis(read_game(id.clone()).fall_delay_ms));
+                yield Event::data(game_state);
             }
             run_with_mutex_mut(id.clone(), &Well::exit);
             let w: Well = read_game(id.clone());
             let game_state = serde_json::to_string(&w).unwrap();
             yield Event::data(game_state);
-            stop_game(id.clone());
+            remove_game(id.clone());
         } else {
-            // let raw = stream::iter(vec![Event::data("No Active Games")]);
-            // yield EventStream::from(raw);
-            // yield Event::data("No Active Games");
+            log::info!("Game completed.");
             yield Event::data(json!({
                 "running": false,
                 "data": {}
