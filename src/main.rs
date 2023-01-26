@@ -17,9 +17,11 @@ mod util;
 
 use rocket::response::stream::{Event, EventStream};
 use rocket::tokio::time::{self, Duration};
-use rocket::http::Header;
+use rocket::http::{Header, Status};
 use rocket::{Request, Response};
 use rocket::fairing::{Fairing, Info, Kind};
+use rocket::futures::stream;
+use serde_json::{json};
 
 #[get("/")]
 fn default() -> &'static str {
@@ -36,6 +38,13 @@ fn run_with_mutex_mut<T>(id: String, func: &dyn Fn(&mut Well) -> T) -> T {
     return res;
 }
 
+fn stop_game(id: String) -> () {
+    // the mutex is scoped so we don't actually have to manually remove it
+    let mut map: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
+    map.remove(&id.clone());
+    log::info!("Stopped game with id {id}", id=id);
+}
+
 fn read_game(id: String) -> Well {
     let map: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
     let game: Well = map.get(&id.clone()).cloned().unwrap();
@@ -43,28 +52,57 @@ fn read_game(id: String) -> Well {
     return game;
 }
 
+#[get("/setup_game")]
+fn new_game() -> String {
+    log::info!("Starting setup of new game");
+    let mut map: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
+    let mut w: Well = Tetris::new();
+    w.fall_delay_ms = 100;
+    let id: String = w.id.clone();
+    map.insert(w.id.clone(),w.clone());
+    std::mem::drop(map);
+    run_with_mutex_mut(id.clone(), &Well::setup);
+    log::info!("Starting setup of new game with id {id}", id=id);
+    return serde_json::to_string(&w).unwrap();
+}
+
 /// Create a new game
-#[get("/game")]
+#[get("/game_status")]
 fn start_game() -> EventStream![] {
     let mut map: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
-    let mut t: Well = Tetris::new();
-    let id: String = t.id.clone();
-    map.insert(t.id.clone(),t.clone());
-    let mut game: Well = map.get(&t.id.clone()).cloned().unwrap();
+    let map_is_empty = map.is_empty();
+    let mut id = String::from("");
+    if !map_is_empty {
+        id = map.keys().last().unwrap().to_string();
+    }
+    log::info!("Map is empty: {map_is_empty}", map_is_empty=map_is_empty);
     std::mem::drop(map);
     EventStream! {
-        run_with_mutex_mut(id.clone(), &Well::setup);
-        let mut interval = time::interval(Duration::from_millis(game.fall_delay_ms));
-        let mut running = true;
-        while running {
-            run_with_mutex_mut(id.clone(), &Well::move_down);
-            running = run_with_mutex_mut(id.clone(), &Well::run_frame);
-            let t: Well = read_game(id.clone());
-            let game_state = serde_json::to_string(&t).unwrap();
+        if id != "".to_string() {
+            let mut running = read_game(id.clone()).running;
+            let mut interval = time::interval(Duration::from_millis(read_game(id.clone()).fall_delay_ms));
+            while running {
+                running = run_with_mutex_mut(id.clone(), &Well::run_frame);
+                let w: Well = read_game(id.clone());
+                let game_state = serde_json::to_string(&w).unwrap();
+                yield Event::data(game_state);
+                interval.tick().await;
+                interval = time::interval(Duration::from_millis(read_game(id.clone()).fall_delay_ms));
+            }
+            run_with_mutex_mut(id.clone(), &Well::exit);
+            let w: Well = read_game(id.clone());
+            let game_state = serde_json::to_string(&w).unwrap();
             yield Event::data(game_state);
-            interval.tick().await;
+            stop_game(id.clone());
+        } else {
+            // let raw = stream::iter(vec![Event::data("No Active Games")]);
+            // yield EventStream::from(raw);
+            // yield Event::data("No Active Games");
+            yield Event::data(json!({
+                "running": false,
+                "data": {}
+                }).to_string())
         }
-        run_with_mutex_mut(id.clone(), &Well::exit);
     }
 }
 
@@ -149,11 +187,17 @@ impl Fairing for CORS {
         response.set_header(Header::new("Access-Control-Allow-Methods", "POST, GET, PATCH, OPTIONS"));
         response.set_header(Header::new("Access-Control-Allow-Headers", "*"));
         response.set_header(Header::new("Access-Control-Allow-Credentials", "true"));
+        response.set_status(Status::Ok);
     }
 }
 
 #[launch]
 fn rocket() -> _ {
     rocket::build()
-        .mount("/", routes![default, start_game, move_tetromino, rotate_tetromino]).attach(CORS)
+        .mount("/", routes![
+            default,
+            start_game,
+            move_tetromino,
+            rotate_tetromino,
+            new_game]).attach(CORS)
 }

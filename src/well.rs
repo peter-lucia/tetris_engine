@@ -132,7 +132,7 @@ impl Clone for Well {
             grid: self.grid,
             current_tetromino: self.current_tetromino.clone(),
             score: self.score,
-            running: false,
+            running: self.running,
             fall_delay_ms: self.fall_delay_ms,
             fall_delay_min_ms: self.fall_delay_min_ms,
             fall_delay_delta: self.fall_delay_delta,
@@ -172,7 +172,7 @@ impl Tetris for Well {
 
     fn run_frame(&mut self) -> bool {
         println!("Current position ({},{})", self.current_tetromino.x, self.current_tetromino.y);
-        self.log_grid();
+        // self.log_grid();
         if self.current_tetromino.is_stuck(self.grid) && self.current_tetromino.y != 0 {
             self.current_tetromino.stick_to_grid(&mut self.grid);
             log::info!("Current tetromino is stuck!");
