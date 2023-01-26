@@ -63,8 +63,8 @@ fn new_game() -> String {
     let id: String = w.id.clone();
     map.insert(w.id.clone(),w.clone());
     std::mem::drop(map);
-    // TODO: kick this to a background thread
 
+    log::info!("Starting new game with id {id}", id=id);
     let id2 = id.clone();
     thread::spawn(move || {
         run_with_mutex_mut(id2.clone(), &Well::setup);
@@ -75,9 +75,6 @@ fn new_game() -> String {
         }
         run_with_mutex_mut(id2.clone(), &Well::quit);
     });
-
-    // run_with_mutex_mut(id.clone(),&Well::simulate_game);
-    log::info!("Starting setup of new game with id {id}", id=id);
     return serde_json::to_string(&w).unwrap();
 }
 
