@@ -140,6 +140,8 @@ fn move_tetromino(req: &str) -> String {
         well.move_left();
     } else if direction == "right" {
         well.move_right();
+    } else if direction == "down" {
+        well.move_down();
     }
     // create the json response
     let result = serde_json::to_string(&well).unwrap();
