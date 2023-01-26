@@ -75,9 +75,8 @@ fn start_game() -> EventStream![] {
     if !map_is_empty {
         id = map.keys().last().unwrap().to_string();
     }
-    log::info!("Map is empty: {map_is_empty}", map_is_empty=map_is_empty);
+    log::info!("Map is empty? {map_is_empty}", map_is_empty=map_is_empty);
     std::mem::drop(map);
-    let mut interval = time::interval(Duration::from_millis(read_game(id.clone()).fall_delay_ms));
     EventStream! {
         if id != "".to_string() {
             let mut running = read_game(id.clone()).running;
@@ -88,6 +87,11 @@ fn start_game() -> EventStream![] {
                 let game_state = serde_json::to_string(&w).unwrap();
                 interval.tick().await;
                 yield Event::data(game_state);
+                let mut new_interval = time::interval(Duration::from_millis(read_game(id.clone()).fall_delay_ms));
+                if interval.period() != new_interval.period() {
+                    interval = new_interval;
+                    interval.tick().await;
+                }
             }
             run_with_mutex_mut(id.clone(), &Well::exit);
             let w: Well = read_game(id.clone());
