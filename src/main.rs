@@ -17,7 +17,7 @@ mod util;
 
 use rocket::response::stream::{Event, EventStream};
 use rocket::tokio::time::{self, Duration};
-use rocket::http::{Header, Status};
+use rocket::http::{Header, Method, Status};
 use rocket::{Request, Response};
 use rocket::fairing::{Fairing, Info, Kind};
 use rocket::futures::stream;
@@ -116,12 +116,14 @@ fn start_game() -> EventStream![] {
 /// }
 #[put("/move_tetromino", data = "<req>")]
 fn move_tetromino(req: &str) -> String {
+    log::info!("Moving tetromino");
     let id: Option<String> = util::extract_id(req);
     if id.is_none() {
         return util::get_response_missing_id_json(req);
     }
     let binding: serde_json::Value = serde_json::from_str(req).unwrap();
     let direction: String = binding.get("direction").unwrap().as_str().unwrap().to_string();
+    log::info!("Moving tetromino {direction}", direction=direction);
     let mut hashmap_guard: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
     // must clone the original reference
     let mut well: Well = hashmap_guard.get(&id.clone().unwrap()).cloned().unwrap();
@@ -186,10 +188,12 @@ impl Fairing for CORS {
 
     async fn on_response<'r>(&self, _request: &'r Request<'_>, response: &mut Response<'r>) {
         response.set_header(Header::new("Access-Control-Allow-Origin", "*"));
-        response.set_header(Header::new("Access-Control-Allow-Methods", "POST, GET, PATCH, OPTIONS"));
+        response.set_header(Header::new("Access-Control-Allow-Methods", "POST, GET, PATCH, OPTIONS, PUT"));
         response.set_header(Header::new("Access-Control-Allow-Headers", "*"));
         response.set_header(Header::new("Access-Control-Allow-Credentials", "true"));
-        response.set_status(Status::Ok);
+        // if _request.method() == Method::Get {
+            response.set_status(Status::Ok);
+        // }
     }
 }
 
