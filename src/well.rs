@@ -5,13 +5,14 @@ use rand::Rng;
 
 
 use std::cmp::{max};
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use std::{fs};
 
 
 
 use std::path::Path;
+use std::thread::sleep;
 use serde::{Deserialize, Serialize};
 
 use uuid::{Uuid};
@@ -191,6 +192,7 @@ impl Tetris for Well {
         self.setup();
         while self.running {
             self.running = self.run_frame();
+            sleep(Duration::from_millis(self.fall_delay_ms))
         }
         self.quit();
     }

@@ -5,6 +5,8 @@ extern crate rocket;
 
 use std::collections::HashMap;
 use std::sync::MutexGuard;
+use std::thread;
+use std::thread::sleep;
 
 use serde_json;
 use util::ACTIVE_GAMES;
@@ -61,7 +63,20 @@ fn new_game() -> String {
     let id: String = w.id.clone();
     map.insert(w.id.clone(),w.clone());
     std::mem::drop(map);
-    run_with_mutex_mut(id.clone(), &Well::setup);
+    // TODO: kick this to a background thread
+
+    let id2 = id.clone();
+    thread::spawn(move || {
+        run_with_mutex_mut(id2.clone(), &Well::setup);
+        let mut running = read_game(id2.clone()).running;
+        while running {
+            running = run_with_mutex_mut(id2.clone(), &Well::run_frame);
+            sleep(Duration::from_millis(read_game(id2.clone()).fall_delay_ms))
+        }
+        run_with_mutex_mut(id2.clone(), &Well::quit);
+    });
+
+    // run_with_mutex_mut(id.clone(),&Well::simulate_game);
     log::info!("Starting setup of new game with id {id}", id=id);
     return serde_json::to_string(&w).unwrap();
 }
@@ -78,20 +93,17 @@ fn start_game() -> EventStream![] {
     log::info!("Map is empty? {map_is_empty}", map_is_empty=map_is_empty);
     std::mem::drop(map);
     EventStream! {
+        // TODO: send read game updates every 5 ms and kick the game running logic to the background
         if id != "".to_string() {
             let mut running = read_game(id.clone()).running;
-            let mut interval = time::interval(Duration::from_millis(read_game(id.clone()).fall_delay_ms));
+            let mut interval = time::interval(Duration::from_millis(5));
             while running {
-                running = run_with_mutex_mut(id.clone(), &Well::run_frame);
+                // running = run_with_mutex_mut(id.clone(), &Well::run_frame);
                 let w: Well = read_game(id.clone());
+                running = w.running;
                 let game_state = serde_json::to_string(&w).unwrap();
-                interval.tick().await;
                 yield Event::data(game_state);
-                let mut new_interval = time::interval(Duration::from_millis(read_game(id.clone()).fall_delay_ms));
-                if interval.period() != new_interval.period() {
-                    interval = new_interval;
-                    interval.tick().await;
-                }
+                interval.tick().await;
             }
             run_with_mutex_mut(id.clone(), &Well::exit);
             let w: Well = read_game(id.clone());
