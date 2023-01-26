@@ -1,6 +1,8 @@
 # Tetris
 * A tetris game engine backend API built with rust
 
+![](images/game6.png)
+
 ### Getting started
 
 TBD
