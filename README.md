@@ -6,7 +6,7 @@ Example frontend built that interfaces with this API:
 
 ### Getting started
 
-### Rust Crate (Binary)
+#### Rust Binary
 
 * Start the backend API
 
