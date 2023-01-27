@@ -1,33 +1,26 @@
-use crate::tetromino::{Tetromino, TetrominoL, TETROMINO_HEIGHT, TETROMINO_WIDTH, TetrominoStraight, get_random_tetromino};
+use crate::tetromino::{Tetromino, TETROMINO_HEIGHT, TETROMINO_WIDTH, get_random_tetromino};
 use rand::Rng;
-use std::time::Duration;
-use std::io::Write;
-use crate::tetromino;
-use std::error::Error;
-use std::cmp::{min, max};
-use std::time::Instant;
-use std::borrow::BorrowMut;
+
+
+
+
+use std::cmp::{max};
+use std::time::{Duration, Instant};
+
 use std::{fs};
-use std::any::Any;
-use std::future::Future;
-use std::ops::DerefMut;
+
+
+
 use std::path::Path;
-use pyo3::prelude::*;
+use std::thread::sleep;
+use serde::{Deserialize, Serialize};
+
+use uuid::{Uuid};
+
 
 pub const WELL_WIDTH: usize = 14;
 pub const WELL_HEIGHT: usize = 20;
 const HIGH_SCORE_FILENAME: &str = "HIGH_SCORE";
-
-macro_rules! cmdline_color_white {
-    () => {
-        "█".white();
-    }
-}
-macro_rules! cmdline_color_black {
-    () => {
-        " ".black();
-    }
-}
 
 fn get_x_offset() -> usize {
     return 0;
@@ -37,24 +30,23 @@ fn get_y_offset() -> usize {
     return 0;
 }
 
-/// https://pyo3.rs/main/class.html
-#[pyclass]
+#[derive(Serialize, Deserialize)]
 pub struct Well {
+    pub id: String,
+    #[serde(skip, default="Instant::now")]
     current_instant: Instant,
+    #[serde(skip, default="Instant::now")]
     last_instant: Instant,
-    #[pyo3(get, set)]
     pub grid: [[i32; WELL_WIDTH]; WELL_HEIGHT],
+    #[serde(skip)]
     pub current_tetromino: Tetromino,
-    #[pyo3(get, set)]
     pub score: i32,
     pub running: bool,
-    #[pyo3(get, set)]
     pub fall_delay_ms: u64,
-    #[pyo3(get, set)]
     pub fall_delay_min_ms: u64,
-    #[pyo3(get, set)]
     pub fall_delay_delta: u64,
 }
+
 
 pub enum Direction {
     Up,
@@ -73,41 +65,41 @@ pub fn random_direction() -> Direction {
     }
 }
 
-#[pymethods]
 impl Well {
 
-    fn setup_game(&mut self) -> () {
+    pub fn setup_game(&mut self) -> () {
         self.setup();
     }
 
-    fn increment_frame(&mut self) -> () {
+    pub fn increment_frame(&mut self) -> () {
         self.run_frame();
     }
 
-    fn move_down(&mut self) -> () {
+    pub fn move_down(&mut self) -> () {
         self.move_tetromino(Direction::Down);
     }
 
-    fn move_left(&mut self) -> () {
+    pub fn move_left(&mut self) -> () {
         self.move_tetromino(Direction::Left);
     }
 
-    fn move_right(&mut self) -> () {
+    pub fn move_right(&mut self) -> () {
         self.move_tetromino(Direction::Right);
     }
 
-    fn rotate_left(&mut self) -> () {
+    pub fn rotate_left(&mut self) -> () {
         self.rotate_tetromino(true)
     }
 
-    fn rotate_right(&mut self) -> () {
+    pub fn rotate_right(&mut self) -> () {
         self.rotate_tetromino(false)
     }
 
-    fn exit(&mut self) -> () {
+    pub fn exit(&mut self) -> () {
         self.quit();
     }
 }
+
 
 pub trait Tetris {
     /*
@@ -135,12 +127,13 @@ pub trait Tetris {
 impl Clone for Well {
     fn clone(&self) -> Self {
         Well {
+            id: self.id.to_string(),
             current_instant: self.current_instant,
             last_instant: self.last_instant,
             grid: self.grid,
             current_tetromino: self.current_tetromino.clone(),
             score: self.score,
-            running: false,
+            running: self.running,
             fall_delay_ms: self.fall_delay_ms,
             fall_delay_min_ms: self.fall_delay_min_ms,
             fall_delay_delta: self.fall_delay_delta,
@@ -154,6 +147,7 @@ impl Tetris for Well {
         let mut result = Well {
             // |<---------- 12 --------->| plus 2 chars to display edge of wells = 14 x 20
             // where the well is of height 18 with two lines for the top (if needed) and bottom
+            id: Uuid::new_v4().to_string(),
             grid: [[0; WELL_WIDTH]; WELL_HEIGHT],
             current_instant: Instant::now(),
             last_instant: Instant::now(),
@@ -173,17 +167,19 @@ impl Tetris for Well {
     fn setup(&mut self) -> () {
         println!("Game Starting...");
         self.render_edges_and_stuck_pieces();
+        // env_logger::init();
         println!("Initialized...")
     }
 
     fn run_frame(&mut self) -> bool {
         println!("Current position ({},{})", self.current_tetromino.x, self.current_tetromino.y);
-        self.log_grid();
+        // self.log_grid();
         if self.current_tetromino.is_stuck(self.grid) && self.current_tetromino.y != 0 {
             self.current_tetromino.stick_to_grid(&mut self.grid);
             log::info!("Current tetromino is stuck!");
             self.current_tetromino = get_random_tetromino();
         } else if self.current_tetromino.is_stuck(self.grid) && self.current_tetromino.y == 0 {
+            log::info!("Game Over!");
             return false;
         }
         else {
@@ -196,6 +192,7 @@ impl Tetris for Well {
         self.setup();
         while self.running {
             self.running = self.run_frame();
+            sleep(Duration::from_millis(self.fall_delay_ms))
         }
         self.quit();
     }

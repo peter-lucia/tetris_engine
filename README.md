@@ -1,57 +1,15 @@
 # Tetris
-* A tetris game engine built with rust
+* A tetris game engine backend API built with rust
 
-Capabilities
+Example frontend built that interfaces with this API:
+![](images/game6.png)
 
-* Use with your Python or Rust GUI library of choice
+### Getting started
 
-### Python Library - Getting started
-```bash
-pip install git+ssh://git@github.com/peter-lucia/rust_tetris@python-lib
-```
+#### Rust Binary
 
-```python
-def show_board(t):
-    for row in t.grid:
-        print(row)
-    print()
-
-    
-def main():
-    t = create_game()
-    show_board(t)
-    t.setup_game()
-    show_board(t)
-    t.move_down()
-    t.increment_frame()
-    show_board(t)
-
-
-if __name__ == '__main__':
-    main()
-```
-
-### Rust Crate (Binary)
-
-Simulate a game
+* Start the backend API
 
 ```bash
 cargo run --bin rust_tetris
 ```
-
-### Rust Crate (Library)
-
-Build the library only
-
-```bash
-cargo build --lib rust_tetris
-```
-
-### TODO
-- [ ] Multiplayer capability
-- [ ] Web-based UI (Javascript, WASM)
-- [ ] Crate available for rust
-- [ ] Python package available from pypi
-- [ ] Command line UI (Python)
-- [x] Build pipeline - cross-compile for mac, windows, linux
-- [x] Python package available from git
