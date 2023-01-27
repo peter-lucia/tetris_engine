@@ -165,19 +165,13 @@ fn rotate_tetromino(req: &str) -> String {
     let binding: serde_json::Value = serde_json::from_str(req).unwrap();
     let reverse: bool = binding.get("reverse").unwrap().as_bool().unwrap();
 
-    let mut hashmap_guard: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
-    // must clone the original reference
-    let mut well: Well = hashmap_guard.get(&id.clone().unwrap()).cloned().unwrap();
     if reverse {
-        well.rotate_left();
+        run_with_mutex_mut(id.clone().unwrap(), &Well::rotate_left);
     } else {
-        well.rotate_right();
+        run_with_mutex_mut(id.clone().unwrap(), &Well::rotate_right);
     }
     // create the json response
-    let result = serde_json::to_string(&well).unwrap();
-    // update the active games
-    hashmap_guard.insert(id.unwrap().clone().to_string(), well);
-    return result;
+    return serde_json::to_string(&read_game(id.clone().unwrap()).clone()).unwrap();
 }
 
 fn reset() -> () {
