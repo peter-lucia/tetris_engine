@@ -6,7 +6,7 @@ VERSION := latest
 
 
 help: ## Show a list of available commands
-	grep "##.*" $(MAKEFILE_LIST) | grep -v ".*MAKEFILE_LIST.*" | sed -E "s/##//g" | column -t -s :
+	grep "##.*" $(MAKEFILE_LIST) | grep -v ".*MAKEFILE_LIST.*" | sed -E "s/:.*##/:/g" | column -t -s :
 
 
 update: ## Ensures the submodules have the latest available changes
