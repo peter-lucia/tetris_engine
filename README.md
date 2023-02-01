@@ -1,7 +1,7 @@
 # Tetris
 * A tetris game engine backend API built with rust
 
-Example frontend built that interfaces with this API:
+Example frontend that interfaces with this API:
 ![](images/game6.png)
 
 ### Getting started
