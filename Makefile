@@ -34,3 +34,17 @@ run: stop build ## Run the docker image
 run-debug: stop build  ## Run the docker image but open a bash shell instead
 	docker container prune -f
 	docker run -it -p 9000:8080 -p 9001:8000-v $$(pwd)/tetris_frontend:/app/tetris_frontend --name rust-tetris --rm rust-tetris:${VERSION} bash
+
+deploy-clean:  ## Deletes the deployment and load balancer
+	kubectl delete deploy rust-tetris-deployment  || echo "Does not exist";
+	kubectl delete service rust-tetris-load-balancer  || echo "Does not exist";
+
+deploy-local: deploy-clean ## Deploy rust-tetris to the local kubernetes cluster
+	# Docs: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+	kubectl apply -f deploy.yaml
+	kubectl apply -f load_balancer.yaml
+
+view-deploy-local:  ## View the pods that were deployed locally
+	kubectl get pods --show-labels
+	kubectl describe services rust-tetris
+

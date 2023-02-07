@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rust-tetris-deployment
+  labels:
+    app: rust-tetris
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: rust-tetris
+  template:
+    metadata:
+      labels:
+        app: rust-tetris
+    spec:
+      containers:
+      - name: rust-tetris
+        image: rust-tetris:latest
+        ports:
+        - containerPort: 8080
+        - containerPort: 8000
