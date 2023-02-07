@@ -17,5 +17,11 @@ cargo --version
 cargo build --bin rust_tetris --release --target x86_64-unknown-linux-gnu
 
 cargo install cross --git https://github.com/cross-rs/cross
+
+
 # Ensure docker desktop is running
+# Release build
 cross build --target x86_64-unknown-linux-gnu --release --bin rust_tetris
+
+# Debug build
+cross build --target x86_64-unknown-linux-gnu --bin rust_tetris

@@ -4,6 +4,7 @@ extern crate lazy_static;
 extern crate rocket;
 
 use std::collections::HashMap;
+use std::io::ErrorKind;
 use std::sync::MutexGuard;
 use std::thread;
 use std::thread::sleep;
@@ -20,7 +21,7 @@ mod util;
 use rocket::response::stream::{Event, EventStream};
 use rocket::tokio::time::{self, Duration};
 use rocket::http::{Header, Method, Status};
-use rocket::{Request, Response};
+use rocket::{Error, Request, Response};
 use rocket::fairing::{Fairing, Info, Kind};
 use rocket::futures::stream;
 use serde_json::{json};
@@ -81,7 +82,11 @@ fn new_game() -> String {
 /// Create a new game
 #[get("/game_status")]
 fn start_game() -> EventStream![] {
-    let mut map: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
+    let mut lock_result = ACTIVE_GAMES.lock();
+    if lock_result.is_err() {
+        panic!("Could not lock active games");
+    }
+    let mut map: MutexGuard<HashMap<String, Well>> = lock_result.unwrap();
     let map_is_empty = map.is_empty();
     let mut id = String::from("");
     if !map_is_empty {
@@ -106,7 +111,7 @@ fn start_game() -> EventStream![] {
             let w: Well = read_game(id.clone());
             let game_state = serde_json::to_string(&w).unwrap();
             yield Event::data(game_state);
-            remove_game(id.clone());
+            // remove_game(id.clone());
         } else {
             log::info!("Game completed.");
             yield Event::data(json!({

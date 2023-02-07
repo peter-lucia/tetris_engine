@@ -14,18 +14,13 @@ RUN apt-get update -y && \
 WORKDIR /app
 
 COPY target/x86_64-unknown-linux-gnu/release/rust_tetris .
-COPY tetris_frontend/ /var/www/tetris
+#COPY target/x86_64-unknown-linux-gnu/debug/rust_tetris .
 COPY tetris_frontend/sites-enabled /etc/nginx/sites-enabled/rust_tetris
-COPY tetris_frontend/*.html /usr/share/nginx/html/
-COPY tetris_frontend/css/*.css /usr/share/nginx/html/
-COPY tetris_frontend/js/*.js /usr/share/nginx/html/
+COPY Rocket.toml Rocket.toml
+
+COPY tetris_frontend/ tetris_frontend/
 
 
 CMD service nginx restart
 
-#RUN useradd spock
-#RUN chown -R spock:spock /app
-#USER spock
-
-CMD ./rust_tetris &&
-CMD nginx -g 'daemon off;'
+CMD ./rust_tetris & disown && nginx -g 'daemon off;'
