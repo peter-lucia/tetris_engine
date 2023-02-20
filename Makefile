@@ -23,7 +23,7 @@ clean: ## Puts the current repo and its submodules back to their 'main' branch
 build: ## Build the docker image
 	docker build . -f Dockerfile -t rust-tetris:${VERSION} --pull
 
-stop:
+stop: ## Stop the docker container
 	docker stop rust-tetris || echo "Nothing to stop"
 
 run: stop build ## Run the docker image
@@ -39,7 +39,7 @@ deploy-clean:  ## Deletes the deployment and load balancer
 	kubectl delete deploy rust-tetris-deployment  || echo "Does not exist";
 	kubectl delete service rust-tetris-load-balancer  || echo "Does not exist";
 
-deploy-local: deploy-clean ## Deploy rust-tetris to the local kubernetes cluster
+deploy-local: build deploy-clean ## Deploy rust-tetris to the local kubernetes cluster
 	# Docs: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
 	kubectl apply -f deploy.yaml
 	kubectl apply -f load_balancer.yaml
