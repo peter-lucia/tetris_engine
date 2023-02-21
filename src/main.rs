@@ -10,7 +10,7 @@ use std::thread;
 use std::thread::sleep;
 
 use serde_json;
-use util::ACTIVE_GAMES;
+use util::ACTIVE_GAME;
 
 use crate::well::{Tetris, Well};
 
@@ -32,7 +32,7 @@ fn default() -> &'static str {
 }
 
 fn run_with_mutex_mut<T>(id: String, func: &dyn Fn(&mut Well) -> T) -> T {
-    let mut map: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
+    let mut map: MutexGuard<HashMap<String, Well>> = ACTIVE_GAME.lock().unwrap();
     let mut game: Well = map.get(&id.clone()).cloned().unwrap();
     let res = func(&mut game);
     game.log_grid();
@@ -43,25 +43,29 @@ fn run_with_mutex_mut<T>(id: String, func: &dyn Fn(&mut Well) -> T) -> T {
 
 fn remove_game(id: String) -> () {
     // the mutex is scoped so we don't actually have to manually remove it
-    let mut map: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
+    let mut map: MutexGuard<HashMap<String, Well>> = ACTIVE_GAME.lock().unwrap();
     map.remove(&id.clone());
     log::info!("Stopped game with id {id}", id=id);
 }
 
-fn read_game(id: String) -> Well {
-    let map: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
-    let game: Well = map.get(&id.clone()).cloned().unwrap();
+fn read_game(id: String) -> Option<Well> {
+    let map: MutexGuard<HashMap<String, Well>> = ACTIVE_GAME.lock().unwrap();
+    let option: Option<Well> = map.get(&id.clone()).cloned();
+    if option.is_none() {
+        return None;
+    }
     std::mem::drop(map);
-    return game;
+    return option;
 }
 
 #[get("/setup_game")]
 fn new_game() -> String {
     log::info!("Starting setup of new game");
-    let mut map: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
+    let mut map: MutexGuard<HashMap<String, Well>> = ACTIVE_GAME.lock().unwrap();
     let mut w: Well = Tetris::new();
     w.fall_delay_ms = 1000;
     let id: String = w.id.clone();
+    map.clear();
     map.insert(w.id.clone(),w.clone());
     std::mem::drop(map);
 
@@ -69,10 +73,19 @@ fn new_game() -> String {
     let id2 = id.clone();
     thread::spawn(move || {
         run_with_mutex_mut(id2.clone(), &Well::setup);
-        let mut running = read_game(id2.clone()).running;
+        let mut running = false;
+        let option = read_game(id2.clone());
+        if option.is_some() {
+            running = option.unwrap().running;
+        }
         while running {
             running = run_with_mutex_mut(id2.clone(), &Well::run_frame);
-            sleep(Duration::from_millis(read_game(id2.clone()).fall_delay_ms))
+            let game = read_game(id2.clone());
+            if game.is_none() {
+                running = false;
+            } else {
+                sleep(Duration::from_millis(game.unwrap().fall_delay_ms))
+            }
         }
         run_with_mutex_mut(id2.clone(), &Well::quit);
     });
@@ -82,7 +95,7 @@ fn new_game() -> String {
 /// Create a new game
 #[get("/game_status")]
 fn start_game() -> EventStream![] {
-    let mut lock_result = ACTIVE_GAMES.lock();
+    let mut lock_result = ACTIVE_GAME.lock();
     if lock_result.is_err() {
         panic!("Could not lock active games");
     }
@@ -95,20 +108,33 @@ fn start_game() -> EventStream![] {
     log::info!("Map is empty? {map_is_empty}", map_is_empty=map_is_empty);
     std::mem::drop(map);
     EventStream! {
-        // TODO: send read game updates every 5 ms and kick the game running logic to the background
         if id != "".to_string() {
-            let mut running = read_game(id.clone()).running;
+            let mut running = false;
+            let option = read_game(id.clone());
+            if option.is_some() {
+                running = option.unwrap().running;
+            }
             let mut interval = time::interval(Duration::from_millis(5));
             while running {
                 // running = run_with_mutex_mut(id.clone(), &Well::run_frame);
-                let w: Well = read_game(id.clone());
-                running = w.running;
-                let game_state = serde_json::to_string(&w).unwrap();
-                yield Event::data(game_state);
-                interval.tick().await;
+                let option: Option<Well> = read_game(id.clone());
+                if option.is_none() {
+                    running = false;
+                    yield Event::data(json!({
+                        "running": false,
+                        "data": {}
+                        }).to_string());
+                    return;
+                } else {
+                    let w = option.unwrap();
+                    running = w.running;
+                    let game_state = serde_json::to_string(&w).unwrap();
+                    yield Event::data(game_state);
+                    interval.tick().await;
+                }
             }
             run_with_mutex_mut(id.clone(), &Well::exit);
-            let w: Well = read_game(id.clone());
+            let w: Well = read_game(id.clone()).unwrap();
             let game_state = serde_json::to_string(&w).unwrap();
             yield Event::data(game_state);
             // remove_game(id.clone());
@@ -138,7 +164,7 @@ fn move_tetromino(req: &str) -> String {
     let binding: serde_json::Value = serde_json::from_str(req).unwrap();
     let direction: String = binding.get("direction").unwrap().as_str().unwrap().to_string();
     log::info!("Moving tetromino {direction}", direction=direction);
-    let mut hashmap_guard: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
+    let mut hashmap_guard: MutexGuard<HashMap<String, Well>> = ACTIVE_GAME.lock().unwrap();
     // must clone the original reference
     let mut well: Well = hashmap_guard.get(&id.clone().unwrap()).cloned().unwrap();
     if direction == "left" {

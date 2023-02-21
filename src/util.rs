@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use crate::well::{Well};
 
 lazy_static! {
-    pub static ref ACTIVE_GAMES: Mutex<HashMap<String, Well>> = {
+    pub static ref ACTIVE_GAME: Mutex<HashMap<String, Well>> = {
         let mut m = HashMap::new();
         Mutex::new(m)
     };
@@ -13,7 +13,11 @@ lazy_static! {
 
 
 pub fn extract_id(req: &str) -> Option<String> {
-    let hashmap_guard: MutexGuard<HashMap<String, Well>> = ACTIVE_GAMES.lock().unwrap();
+    let guard_option = ACTIVE_GAME.lock();
+    if guard_option.is_err() {
+        return None;
+    }
+    let hashmap_guard: MutexGuard<HashMap<String, Well>> = ACTIVE_GAME.lock().unwrap();
     let binding: serde_json::Value = serde_json::from_str(req).unwrap();
     let id: String = binding.get("id").unwrap().as_str().unwrap().to_string();
     if !hashmap_guard.contains_key(&id) {
