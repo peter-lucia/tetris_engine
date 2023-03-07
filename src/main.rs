@@ -95,7 +95,7 @@ fn start_game() -> EventStream![] {
     log::info!("Map is empty? {map_is_empty}", map_is_empty=map_is_empty);
     std::mem::drop(map);
     EventStream! {
-        // TODO: send read game updates every 5 ms and kick the game running logic to the background
+        // Send read game updates every 5 ms and kick the game running logic to the background
         if id != "".to_string() {
             let mut running = read_game(id.clone()).running;
             let mut interval = time::interval(Duration::from_millis(5));
