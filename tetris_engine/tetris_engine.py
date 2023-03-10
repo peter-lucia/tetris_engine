@@ -1,9 +1,6 @@
-# the name of the module must match the name of the .so or .pyd file in target/debug or target/release
-# https://pyo3.rs/v0.14.5/module.html
-# https://pyo3.rs/v0.4.1/
-# https://pyo3.rs/main/building_and_distribution.html#manual-builds
 import enum
 from rust_tetris import create_game
+
 
 class Direction(enum.Enum):
     Down = enum.auto()
@@ -11,6 +8,7 @@ class Direction(enum.Enum):
     Right = enum.auto()
     RightRotate = enum.auto()
     LeftRotate = enum.auto()
+
 
 class Tetris:
     """
@@ -23,12 +21,27 @@ class Tetris:
         """
         self._game = create_game()
         self.debug = debug
+        if self.debug:
+            self.display()
 
-    def new_game(self):
+    def restart(self):
+        """
+        Creates a new game, overwriting the existing game
+        """
         self._game = create_game()
 
     def end_game(self):
+        """
+        Ends the current game
+        """
         self._game.exit()
+
+    def is_game_running(self):
+        """
+        A check to determine if the current game is still active
+        :return: True if the current game is active, False otherwise
+        """
+        return self._game.is_running()
 
     def move(self, direction: Direction = Direction.Down):
         """
@@ -48,10 +61,18 @@ class Tetris:
             self._game.rotate(reverse=True)
         else:
             raise ValueError("Invalid direction!")
+
+        # does not move the tetromino
         self._game.increment_frame()
         if self.debug:
-            for row in self._game.grid:
-                print(row)
-            print()
+            self.display()
+
+    def display(self):
+        """
+        Display the current state of the game
+        """
+        for row in self._game.grid:
+            print(row)
+        print()
 
 

@@ -12,3 +12,7 @@ My command line implementation of tetris in rust
   * Press 'Spacebar' or 'r' to rotate a tetromino
   * Press 'q' to quit
   * The highest score is saved to HIGH_SCORE
+
+### TODO
+
+* Use poetry or pip-tools

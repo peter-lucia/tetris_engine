@@ -18,17 +18,6 @@ pub const WELL_WIDTH: usize = 14;
 pub const WELL_HEIGHT: usize = 20;
 const HIGH_SCORE_FILENAME: &str = "HIGH_SCORE";
 
-macro_rules! cmdline_color_white {
-    () => {
-        "█".white();
-    }
-}
-macro_rules! cmdline_color_black {
-    () => {
-        " ".black();
-    }
-}
-
 fn get_x_offset() -> usize {
     return 0;
 }
@@ -88,6 +77,9 @@ impl Well {
         self.move_tetromino(Direction::Down);
     }
 
+    fn is_running(&self) -> bool {
+        return self.running;
+    }
     fn exit(&mut self) -> () {
         self.quit();
     }
@@ -124,7 +116,7 @@ impl Clone for Well {
             grid: self.grid,
             current_tetromino: self.current_tetromino.clone(),
             score: self.score,
-            running: false,
+            running: self.running,
             fall_delay_ms: self.fall_delay_ms,
             fall_delay_min_ms: self.fall_delay_min_ms,
             fall_delay_delta: self.fall_delay_delta,
@@ -149,6 +141,7 @@ impl Tetris for Well {
             fall_delay_delta: 50,
         };
         result.render_edges_and_stuck_pieces();
+        result.render_tetromino(false);
         result.render_score(result.score);
 
         return result;
@@ -157,6 +150,7 @@ impl Tetris for Well {
     fn setup(&mut self) -> () {
         println!("Game Starting...");
         self.render_edges_and_stuck_pieces();
+        self.render_tetromino(false);
     }
 
     fn run_frame(&mut self) -> () {
@@ -166,8 +160,6 @@ impl Tetris for Well {
             self.current_tetromino.stick_to_grid(&mut self.grid);
             log::info!("Current tetromino is stuck!");
             self.current_tetromino = get_random_tetromino();
-        } else {
-            self.move_tetromino(Direction::Down);
         }
     }
 
@@ -184,7 +176,7 @@ impl Tetris for Well {
         // paint the outline of the board
         for x in 0..WELL_WIDTH {
             for y in 0..WELL_HEIGHT {
-                if y == 0 || y == WELL_HEIGHT - 1 {
+                if y == WELL_HEIGHT - 1 {
                     self.grid[y][x] = 1;
                 }
                 else if x == 0 || x == WELL_WIDTH - 1 {
@@ -224,7 +216,7 @@ impl Tetris for Well {
                 if !erase && self.current_tetromino.area[yy][xx] == 1 {
                     self.grid[y][x] = 2;
                 } else {
-                    if y > 0 && y < WELL_HEIGHT - 1 && x > 0 && x < WELL_WIDTH - 1
+                    if y < WELL_HEIGHT - 1 && x > 0 && x < WELL_WIDTH - 1
                         && self.grid[y][x] == 2 {
                         self.grid[y][x] = 0;
                     }
