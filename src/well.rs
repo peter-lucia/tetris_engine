@@ -80,7 +80,7 @@ impl Well {
         self.setup();
     }
 
-    fn run_frame(&mut self) -> () {
+    fn increment_frame(&mut self) -> () {
         self.run_frame();
     }
 
@@ -88,7 +88,7 @@ impl Well {
         self.move_tetromino(Direction::Down);
     }
 
-    fn quit(&mut self) -> () {
+    fn exit(&mut self) -> () {
         self.quit();
     }
 }
