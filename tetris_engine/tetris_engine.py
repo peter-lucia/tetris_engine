@@ -24,7 +24,6 @@ class Tetris:
         self._game = create_game()
         self.debug = debug
 
-
     def new_game(self):
         self._game = create_game()
 
