@@ -12,18 +12,51 @@ use std::any::Any;
 use std::future::Future;
 use std::ops::DerefMut;
 use std::path::Path;
+use std::sync::{mpsc, Arc, Mutex, MutexGuard};
+use std::mem;
+use std::thread;
+
 use pyo3::prelude::*;
 
 pub const WELL_WIDTH: usize = 14;
 pub const WELL_HEIGHT: usize = 20;
 const HIGH_SCORE_FILENAME: &str = "HIGH_SCORE";
 
-fn get_x_offset() -> usize {
-    return 0;
+
+lazy_static! {
+    pub static ref ACTIVE_GAME: Mutex<Well> = {
+        let mut tetris = Tetris::new();
+        return Mutex::new(tetris);
+    };
 }
 
-fn get_y_offset() -> usize {
-    return 0;
+pub fn read_game() -> Well {
+    let hashmap_guard: MutexGuard<Well> = ACTIVE_GAME.lock().expect("Could not lock mutex for reading");
+    let result = hashmap_guard.clone();
+    mem::drop(hashmap_guard);
+    return result;
+}
+
+pub fn write_game(_well: Well) -> () {
+    let mut hashmap_guard: MutexGuard<Well> = ACTIVE_GAME.lock().expect("Could not lock mutex for writing");
+    mem::replace(&mut *hashmap_guard, _well.clone());
+    drop(hashmap_guard);
+}
+
+pub fn start_game_multithreaded() -> () {
+    println!("Starting multithreaded game");
+    thread::spawn(move || {
+        let mut _well = read_game();
+        while _well.running {
+            thread::sleep(Duration::from_millis(_well.fall_delay_ms));
+            _well.run_frame();
+            _well.move_tetromino(Direction::Down);
+            write_game(_well.clone());
+        }
+        _well.quit();
+        write_game(_well.clone());
+    });
+    println!("Finished starting multithreaded game");
 }
 
 /// https://pyo3.rs/main/class.html
@@ -62,6 +95,7 @@ pub fn random_direction() -> Direction {
     }
 }
 
+/// Wrapper methods that are callable from python for the Well struct
 #[pymethods]
 impl Well {
 
@@ -75,6 +109,18 @@ impl Well {
 
     fn move_down(&mut self) -> () {
         self.move_tetromino(Direction::Down);
+    }
+
+    fn move_right(&mut self) -> () {
+        self.move_tetromino(Direction::Right);
+    }
+
+    fn move_left(&mut self) -> () {
+        self.move_tetromino(Direction::Left);
+    }
+
+    fn rotate(&mut self, reverse: bool) -> () {
+        self.rotate_tetromino(reverse)
     }
 
     fn is_running(&self) -> bool {
@@ -103,8 +149,8 @@ pub trait Tetris {
     fn quit(&mut self) -> ();
     fn setup(&mut self) -> ();
     fn run_frame(&mut self) -> ();
-    fn simulate_game(&mut self) -> ();
-    fn rotate_tetromino(&mut self) -> ();
+    fn run_game(&mut self) -> ();
+    fn rotate_tetromino(&mut self, reverse: bool) -> ();
 }
 
 
@@ -153,6 +199,7 @@ impl Tetris for Well {
         self.render_tetromino(false);
     }
 
+    /// Returns false if stuck, true otherwise
     fn run_frame(&mut self) -> () {
         println!("Current position ({},{})", self.current_tetromino.x, self.current_tetromino.y);
         self.log_grid();
@@ -163,10 +210,11 @@ impl Tetris for Well {
         }
     }
 
-    fn simulate_game(&mut self) -> () {
-        self.setup();
+    fn run_game(&mut self) -> () {
         while self.running {
             self.run_frame();
+            self.move_tetromino(Direction::Down);
+            thread::sleep(Duration::from_millis(self.fall_delay_ms));
         }
         self.quit();
     }
@@ -292,19 +340,21 @@ impl Tetris for Well {
         self.render_falling_blocks();
     }
 
-    fn rotate_tetromino(&mut self) -> () {
+    /// Rotates as many times until no collision happens,
+    /// which can be 360 degrees, where no rotation is possible.
+    fn rotate_tetromino(&mut self, reverse: bool) -> () {
         self.render_tetromino(true);
         let mut i = 0;
         loop {
-            self.current_tetromino.rotate(false);
-            if (!self.current_tetromino
-                .will_collide(self.grid, 0, 0)) || i == 4 {
+            self.current_tetromino.rotate(reverse);
+            if (!self.current_tetromino.will_collide(self.grid, 0, 0)) || i == 4 {
                 break;
             }
             i += 1;
         }
         self.render_tetromino(false);
     }
+
 
     fn record_high_score(&mut self) -> () {
         let mut high_score = self.get_high_score();
@@ -335,6 +385,6 @@ impl Tetris for Well {
     }
 
     fn quit(&mut self) -> () {
-
+        self.running = false;
     }
 }

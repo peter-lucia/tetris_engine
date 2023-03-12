@@ -1,7 +1,9 @@
-from tetris_engine import Tetris
+from time import sleep
+
+from tetris_engine import Tetris, Direction
 
 
-def test_alt():
+def run_lib():
     """
     Tests the underlying rust library
     """
@@ -13,14 +15,26 @@ def test_alt():
         for row in t.grid:
             print(row)
         print()
-    assert True, "Success"
 
 
-def test_main():
+def run_main():
     """
     Tests a simple running of the game
     """
     tetris = Tetris(debug=True)
     while tetris.is_game_running():
-        tetris.move()
-    assert True, "Success"
+        tetris.move(direction=Direction.Down.value)
+        sleep(1)
+
+
+def run_multithreaded():
+    tetris = Tetris(multithreaded=True, debug=True)
+    while tetris.is_game_running():
+        tetris.display()
+        sleep(.5)
+
+
+if __name__ == '__main__':
+    # run_lib()
+    run_main()
+    # run_multithreaded()
