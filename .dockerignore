@@ -1,9 +1,0 @@
-target/debug
-target/release
-target/wasm32-unknown-unknown
-target/x86_64-apple-darwin
-target/x86_64-unknown-linux-musl
-target/*.json
-target/*.TAG
-images/
-src/

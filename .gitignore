@@ -4,4 +4,5 @@ HIGH_SCORE
 .DS_Store
 .idea/
 build/
-src/rust_tetris.egg-info
+*.pyc
+tetris_engine.egg-info/

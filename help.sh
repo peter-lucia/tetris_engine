@@ -1,27 +1,12 @@
 #!/bin/bash
 
+# the name of the module must match the name of the .so or .pyd file in target/debug or target/release
+# https://pyo3.rs/v0.14.5/module.html
+# https://pyo3.rs/v0.4.1/
+# https://pyo3.rs/main/building_and_distribution.html#manual-builds
 
-# Cross compilation
 # https://pyo3.rs/v0.4.1/
 rustup target list
-# rustup target add <specific target from list>
-#rustup target add x86_64-unknown-linux-musl
-rustup target add x86_64-unknown-linux-gnu
+rustup target add <specific target from list>
 
-cargo --version
-rustup update
-cargo --version
-
-#cargo build --lib --target x86_64-apple-darwin
-#cargo build --bin rust_tetris --target x86_64-unknown-linux-musl
-cargo build --bin rust_tetris --release --target x86_64-unknown-linux-gnu
-
-cargo install cross --git https://github.com/cross-rs/cross
-
-
-# Ensure docker desktop is running
-# Release build
-cross build --target x86_64-unknown-linux-gnu --release --bin rust_tetris
-
-# Debug build
-cross build --target x86_64-unknown-linux-gnu --bin rust_tetris
+cargo build --lib --target x86_64-apple-darwin

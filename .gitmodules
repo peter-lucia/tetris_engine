@@ -1,3 +1,0 @@
-[submodule "tetris_frontend"]
-	path = tetris_frontend
-	url = git@github.com:peter-lucia/tetris_frontend.git
