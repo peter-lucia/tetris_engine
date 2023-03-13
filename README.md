@@ -42,10 +42,3 @@ def run_multithreaded():
 
 
 ```
-
-### TODO
-
-Open an issue or like an existing issue for increased priority
-
-- [ ] Post to PyPi
-- [ ] Use poetry or pip-tools
