@@ -1,6 +1,6 @@
 import enum
 
-from rust_tetris import create_game, read_game_multithreaded, write_game_multithreaded, start_game_multithreaded
+from tetris_engine_backend import create_game, read_game_multithreaded, write_game_multithreaded, start_game_multithreaded
 
 
 class Direction(enum.Enum):
@@ -19,24 +19,19 @@ class Tetris:
       the board automatically. The client just supplies the user's commands
     """
 
-    def __init__(self, multithreaded: bool = False, debug: bool = False):
+    def __init__(self, multithreaded: bool = False):
         """
         Creates a tetris game
         """
         self.multithreaded = multithreaded
         if self.multithreaded:
-            print("Creating a multithreaded game")
             self._game = read_game_multithreaded()
             start_game_multithreaded()
         else:
-            print("Creating a single threaded game")
             self._game = create_game()
             self._game.setup_game()
-        self.debug = debug
-        if self.debug:
-            self.display()
 
-    def restart(self):
+    def restart(self) -> None:
         """
         Creates a new game, overwriting the existing game
         """
@@ -45,23 +40,22 @@ class Tetris:
         else:
             self._game = create_game()
 
-    def end_game(self):
+    def end_game(self) -> None:
         """
         Ends the current game
         """
         self._game.exit()
 
-    def is_game_running(self):
+    def is_game_running(self) -> bool:
         """
         A check to determine if the current game is still active
         :return: True if the current game is active, False otherwise
         """
         if self.multithreaded:
             self._game = read_game_multithreaded()
-            return self._game.is_running()
         return self._game.is_running()
 
-    def move(self, direction: int = Direction.Down.value):
+    def move(self, direction: int = Direction.Down.value) -> None:
         """
         Moves the tetromino
         :param direction: The direction or rotation to apply. Down, left, right, right rotate, and left rotate
@@ -87,17 +81,9 @@ class Tetris:
         # does not move the tetromino
         self._game.increment_frame()
 
-        if self.debug:
-            self.display()
-
-    def display(self):
+    def read_game(self) -> None:
         """
         Display the current state of the game
         """
         if self.multithreaded:
             self._game = read_game_multithreaded()
-        for row in self._game.grid:
-            print(row)
-        print()
-
-

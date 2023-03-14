@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
 
     steps:
     - uses: actions/checkout@v3
@@ -70,6 +70,10 @@ jobs:
     - name: Install Dependencies and Build Python Package
       run: |
         python -m pip install --upgrade pip
-        python -m pip install setuptools-rust
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         python setup.py build --verbose
+    - name: Test with pytest
+      run: |
+        if [ -f requirements-test.txt ]; then pip install -r requirements-test.txt; fi
+        python setup.py install --verbose
+        pytest

@@ -44,7 +44,6 @@ pub fn write_game(_well: Well) -> () {
 }
 
 pub fn start_game_multithreaded() -> () {
-    println!("Starting multithreaded game");
     thread::spawn(move || {
         let mut _well = read_game();
         while _well.running {
@@ -56,7 +55,6 @@ pub fn start_game_multithreaded() -> () {
         _well.quit();
         write_game(_well.clone());
     });
-    println!("Finished starting multithreaded game");
 }
 
 /// https://pyo3.rs/main/class.html
@@ -194,14 +192,12 @@ impl Tetris for Well {
     }
 
     fn setup(&mut self) -> () {
-        println!("Game Starting...");
         self.render_edges_and_stuck_pieces();
         self.render_tetromino(false);
     }
 
     /// Returns false if stuck, true otherwise
     fn run_frame(&mut self) -> () {
-        println!("Current position ({},{})", self.current_tetromino.x, self.current_tetromino.y);
         self.log_grid();
         if self.current_tetromino.is_stuck(self.grid) && self.current_tetromino.y != 0 {
             self.current_tetromino.stick_to_grid(&mut self.grid);

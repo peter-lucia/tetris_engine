@@ -432,18 +432,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49b3de9ec5dc0a3417da371aab17d729997c15010e7fd24ff707773a33bddb64"
 
 [[package]]
-name = "rust_tetris"
-version = "0.1.0"
-dependencies = [
- "env_logger",
- "lazy_static",
- "log",
- "log4rs",
- "pyo3",
- "rand",
-]
-
-[[package]]
 name = "ryu"
 version = "1.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -538,6 +526,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bab24d30b911b2376f3a13cc2cd443142f0c81dda04c118693e35b3835757755"
 dependencies = [
  "winapi-util",
+]
+
+[[package]]
+name = "tetris_engine_backend"
+version = "0.1.1"
+dependencies = [
+ "env_logger",
+ "lazy_static",
+ "log",
+ "log4rs",
+ "pyo3",
+ "rand",
 ]
 
 [[package]]

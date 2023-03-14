@@ -1,6 +1,6 @@
 [package]
-name = "rust_tetris"
-version = "0.1.0"
+name = "tetris_engine_backend"
+version = "0.1.1"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -13,7 +13,7 @@ log4rs = "1.1.1"
 lazy_static = "1.4.0"
 
 [lib]
-name = "rust_tetris"
+name = "tetris_engine_backend"
 # "cdylib" is necessary to produce a shared library for Python to import from.
 crate-type = ["cdylib"]
 

@@ -1,3 +1,5 @@
+#[macro_use]
+extern crate lazy_static;
 use std::borrow::{Borrow, BorrowMut};
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};

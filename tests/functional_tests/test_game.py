@@ -1,9 +1,7 @@
-from time import sleep
-
 from tetris_engine import Tetris, Direction
 
 
-def run_lib():
+def test_rust_lib():
     """
     Tests the underlying rust library
     """
@@ -12,29 +10,39 @@ def run_lib():
     while t.is_running():
         t.move_down()
         t.increment_frame()
-        for row in t.grid:
-            print(row)
-        print()
+
+    assert True
 
 
-def run_main():
+def test_singlethreaded():
     """
     Tests a simple running of the game
     """
-    tetris = Tetris(debug=True)
+    tetris = Tetris()
     while tetris.is_game_running():
         tetris.move(direction=Direction.Down.value)
-        sleep(1)
+    assert True
 
 
-def run_multithreaded():
-    tetris = Tetris(multithreaded=True, debug=True)
+def test_multithreaded():
+    tetris = Tetris(multithreaded=True)
+    old_grid = tetris._game.grid
+    test_passes = False
     while tetris.is_game_running():
-        tetris.display()
-        sleep(.5)
+        tetris.read_game()
+        new_grid = tetris._game.grid
+        if old_grid != new_grid:
+            test_passes = True
+            for row in old_grid:
+                print(row)
+            print()
+
+            for row in new_grid:
+                print(row)
+            print()
+            break
+    assert test_passes
 
 
 if __name__ == '__main__':
-    # run_lib()
-    run_main()
-    # run_multithreaded()
+    test_multithreaded()

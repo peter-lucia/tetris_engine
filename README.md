@@ -1,9 +1,14 @@
 # Tetris
+
+[![Rust](https://github.com/peter-lucia/tetris_engine/actions/workflows/rust.yml/badge.svg)](https://github.com/peter-lucia/tetris_engine/actions/workflows/rust.yml)
+
 A tetris engine python package powered by rust
+
 * Handles the tetris game logic for you so you can focus on building a tetris interface
 * Provides flexibility for the game loop, allowing you to define the game loop entirely
 or run a built-in game loop thread in the background
 * The built-in, multithreaded game loop capability makes use of rust's safe concurrency offering
+
 
 
 
@@ -42,10 +47,3 @@ def run_multithreaded():
 
 
 ```
-
-### TODO
-
-Open an issue or like an existing issue for increased priority
-
-- [ ] Post to PyPi
-- [ ] Use poetry or pip-tools

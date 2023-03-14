@@ -38,7 +38,7 @@ fn write_game_multithreaded(_well: Well) -> () {
 /// https://doc.rust-lang.org/reference/lifetime-elision.html#lifetime-elision-in-functions
 /// https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html
 #[pymodule]
-#[pyo3(name = "rust_tetris")]
+#[pyo3(name = "tetris_engine_backend")]
 fn setup_tetris(py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(create_game, m)?)?;
     m.add_function(wrap_pyfunction!(read_game_multithreaded, m)?)?;
