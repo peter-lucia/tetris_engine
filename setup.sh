@@ -16,3 +16,7 @@ python setup.py build
 # Build and install all at once:
 python setup.py install
 
+# Test CI
+# https://cibuildwheel.readthedocs.io/en/stable/setup/
+pip install cibuildwheel
+cibuildwheel --platform linux
