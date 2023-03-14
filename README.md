@@ -1,6 +1,7 @@
 # Tetris
 
 [![Rust](https://github.com/peter-lucia/tetris_engine/actions/workflows/rust.yml/badge.svg)](https://github.com/peter-lucia/tetris_engine/actions/workflows/rust.yml)
+[![Build and Release Wheels](https://github.com/peter-lucia/tetris_engine/actions/workflows/wheels.yml/badge.svg)](https://github.com/peter-lucia/tetris_engine/actions/workflows/wheels.yml)
 
 A tetris engine python package powered by rust
 
