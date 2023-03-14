@@ -1,4 +1,5 @@
 import enum
+from typing import List
 
 from tetris_engine_backend import create_game, read_game_multithreaded, write_game_multithreaded, start_game_multithreaded
 
@@ -81,9 +82,11 @@ class Tetris:
         # does not move the tetromino
         self._game.increment_frame()
 
-    def read_game(self) -> None:
+    def read_game(self) -> List[List]:
         """
-        Display the current state of the game
+        Get the current state of the game
         """
         if self.multithreaded:
             self._game = read_game_multithreaded()
+
+        return self._game.grid

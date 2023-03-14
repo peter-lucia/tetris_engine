@@ -30,9 +30,12 @@ def run_singlethreaded():
     """
     You control the game loop as well as the game speed
     """
-    tetris = Tetris(debug=True)
+    tetris = Tetris()
     while tetris.is_game_running():
         tetris.move(direction=Direction.Down.value)
+        for row in tetris.read_game():
+            print(row)
+        print()
         sleep(1)
         
 
@@ -41,9 +44,12 @@ def run_multithreaded():
     You control the user controls of the game but the 
     game loop runs in a background thread 
     """
-    tetris = Tetris(multithreaded=True, debug=True)
+    tetris = Tetris(multithreaded=True)
     while tetris.is_game_running():
-        tetris.display()
+        tetris.read_game()
+        for row in tetris.read_game():
+            print(row)
+        print()
         sleep(.5)
 
 
