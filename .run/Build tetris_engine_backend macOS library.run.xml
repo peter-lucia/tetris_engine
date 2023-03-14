@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Build tetris_engine_backend lib" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
-    <option name="command" value="build --package tetris_engine_backend --lib" />
+  <configuration default="false" name="Build tetris_engine_backend macOS library" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+    <option name="command" value="rustc --lib -- -C link-arg=-undefined -C link-arg=dynamic_lookup" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <option name="emulateTerminal" value="false" />
     <option name="channel" value="DEFAULT" />

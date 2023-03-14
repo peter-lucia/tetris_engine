@@ -2,7 +2,6 @@ from typing import List
 
 from setuptools import setup
 from setuptools_rust import Binding, RustExtension
-from tetris_engine import __version__
 from pathlib import Path
 
 parent_folder: Path = Path(__file__).parent.absolute()
@@ -17,8 +16,8 @@ with open(test_requirements_file_path) as fh:
 
 setup(
     name="tetris_engine",
-    version=__version__,
     author="Peter Lucia",
+    version ="0.1.1",
     rust_extensions=[RustExtension("tetris_engine_backend", binding=Binding.PyO3)],
     install_requires=requirements,
     test_suite='tests',
@@ -37,5 +36,5 @@ setup(
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
     ],
-    url="https://github.com/peter-lucia/tetris_engine"
+    url="https://github.com/peter-lucia/tetris_engine",
 )
