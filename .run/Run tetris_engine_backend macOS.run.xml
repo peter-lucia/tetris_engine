@@ -1,19 +1,17 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Run rust_tetris macOS" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
-    <option name="command" value="run --package rust_tetris --bin rust_tetris --target x86_64-apple-darwin" />
+  <configuration default="false" name="Run tetris_engine_backend macOS" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+    <option name="command" value="run --package tetris_engine_backend --bin tetris_engine_backend --target x86_64-apple-darwin" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+    <option name="emulateTerminal" value="false" />
     <option name="channel" value="DEFAULT" />
     <option name="requiredFeatures" value="true" />
     <option name="allFeatures" value="false" />
-    <option name="emulateTerminal" value="false" />
     <option name="withSudo" value="false" />
     <option name="buildTarget" value="REMOTE" />
     <option name="backtrace" value="SHORT" />
     <envs />
     <option name="isRedirectInput" value="false" />
     <option name="redirectInputPath" value="" />
-    <method v="2">
-      <option name="RunConfigurationTask" enabled="true" run_configuration_name="Build rust_tetris macOS" run_configuration_type="CargoCommandRunConfiguration" />
-    </method>
+    <method v="2" />
   </configuration>
 </component>

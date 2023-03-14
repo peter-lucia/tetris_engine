@@ -1,6 +1,6 @@
 import enum
 
-from rust_tetris import create_game, read_game_multithreaded, write_game_multithreaded, start_game_multithreaded
+from tetris_engine_backend import create_game, read_game_multithreaded, write_game_multithreaded, start_game_multithreaded
 
 
 class Direction(enum.Enum):

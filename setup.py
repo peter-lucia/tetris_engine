@@ -19,7 +19,7 @@ setup(
     name="tetris_engine",
     version=__version__,
     author="Peter Lucia",
-    rust_extensions=[RustExtension("rust_tetris", binding=Binding.PyO3)],
+    rust_extensions=[RustExtension("tetris_engine_backend", binding=Binding.PyO3)],
     install_requires=requirements,
     test_suite='tests',
     tests_require=test_requirements,

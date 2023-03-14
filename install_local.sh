@@ -1,2 +1,4 @@
 #!/bin/zsh
-python setup.py install
+pip uninstall -y tetris-engine
+python setup.py build
+#python setup.py install
