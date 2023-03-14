@@ -16,7 +16,11 @@ python setup.py build
 # Build and install all at once:
 python setup.py install
 
-# Test CI
+# Build and Publish wheels with cibuildwheel
 # https://cibuildwheel.readthedocs.io/en/stable/setup/
 pip install cibuildwheel
 cibuildwheel --platform linux
+
+# Build and publish wheels with maturin
+pip install maturin
+maturin generate-ci github > .github/workflows/CI.yml

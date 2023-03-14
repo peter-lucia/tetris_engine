@@ -27,12 +27,16 @@ jobs:
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
         env:
-         CIBW_BEFORE_ALL_MACOS: |
-           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-         CIBW_BEFORE_ALL_WINDOWS: |
-           choco install rust
-         CIBW_BEFORE_ALL_LINUX: |
-           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+         CIBW_BEFORE_ALL: |
+           curl https://sh.rustup.rs -sSf | sh -s -- -y
+         CIBW_ENVIRONMENT: PATH=$PATH:~/.cargo/bin
+#         CIBW_BEFORE_ALL_MACOS: |
+#           CIBW_BEFORE_ALL_MACOS
+#           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+#         CIBW_BEFORE_ALL_WINDOWS: |
+#           choco install rust
+#         CIBW_BEFORE_ALL_LINUX: |
+#           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
       - uses: actions/upload-artifact@v3
         with:
