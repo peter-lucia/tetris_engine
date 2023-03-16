@@ -17,7 +17,6 @@ with open(test_requirements_file_path) as fh:
 setup(
     name="tetris_engine",
     author="Peter Lucia",
-    version ="0.1.1",
     rust_extensions=[RustExtension("tetris_engine_backend", binding=Binding.PyO3)],
     install_requires=requirements,
     test_suite='tests',
