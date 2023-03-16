@@ -17,10 +17,17 @@ or run a built-in game loop thread in the background
 
 ### Install the package
 
+Install from pypi
+```bash
+pip install tetris_engine
+```
+
+Install directly from this repository
 ```bash
 pip install http://www.github.com/peter-lucia/tetris_engine/archive/main.zip
 ```
 
+Example usage:
 ```python
 from time import sleep
 
