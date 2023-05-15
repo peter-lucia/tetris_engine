@@ -3,11 +3,8 @@ extern crate lazy_static;
 mod tetromino;
 mod well;
 
-use std::borrow::{Borrow, BorrowMut};
-use std::thread;
-use std::time::Duration;
 use well::{Tetris};
-use crate::well::{Direction, Well, read_game, write_game};
+use crate::well::{Well, read_game, write_game};
 use pyo3::{prelude::*, wrap_pyfunction};
 
 #[pyfunction]

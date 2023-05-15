@@ -1,6 +1,7 @@
 use std::cmp::{max, min};
 use rand::Rng;
 use crate::well::{WELL_WIDTH, WELL_HEIGHT};
+use pyo3::prelude::*;
 
 pub const TETROMINO_WIDTH: usize = 4;
 pub const TETROMINO_HEIGHT: usize = 4;
@@ -12,9 +13,13 @@ pub const TETROMINO_HEIGHT: usize = 4;
 ///     * y (width) position in the well coordinate plane
 /// ## Resources
 ///     * https://www.youtube.com/watch?v=8OK8_tHeCIA
+#[pyclass]
 pub struct Tetromino {
+    #[pyo3(get)]
     pub area: [[i32; TETROMINO_WIDTH]; TETROMINO_HEIGHT],
+    #[pyo3(get)]
     pub x: usize,
+    #[pyo3(get)]
     pub y: usize,
 }
 

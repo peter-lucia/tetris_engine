@@ -1,2 +1,2 @@
 #!/bin/bash
-cargo run --package rust_tetris --bin rust_tetris
+cargo run --package tetris_engine_backend --bin tetris_engine_backend

@@ -6,3 +6,5 @@ HIGH_SCORE
 build/
 *.pyc
 tetris_engine.egg-info/
+.vscode/
+dist/
