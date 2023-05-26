@@ -10,6 +10,15 @@ help: ## Show a list of available commands
 build-lib-darwin: ## Build the rust library for macOS
 	cargo build --lib --target x86_64-apple-darwin --package tetris_engine_backend
 
+rustup-list-targets: ## List available rustup targets
+	rustup target list
+	# rustup target add <specific target from list>
+
+build-python-linux: ## Build the python package for a particular platform
+	# https://cibuildwheel.readthedocs.io/en/stable/setup/
+	# pip install cibuildwheel
+	cibuildwheel --platform linux
+
 build-bin-darwin: ## Build the rust binary app for macOS
 	cargo build --bin tetris_engine_backend --target x86_64-apple-drawin --package tetris_engine_backend
 

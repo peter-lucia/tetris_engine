@@ -1,4 +1,4 @@
-from tetris_engine import Tetris, Direction
+from tetris_engine import Tetris, Direction, Tetromino
 
 
 def test_rust_lib():
@@ -25,6 +25,10 @@ def test_singlethreaded():
 
 
 def test_multithreaded():
+    """
+    Tests that the underlying game grid changes when 
+    running in multithreaded mode
+    """
     tetris = Tetris(multithreaded=True)
     old_grid = tetris._game.grid
     test_passes = False
@@ -43,6 +47,9 @@ def test_multithreaded():
             break
     assert test_passes
 
-
-if __name__ == '__main__':
-    test_multithreaded()
+def test_next_tetromino():
+    tetris = Tetris()
+    current_tetromino = tetris.current_tetromino()
+    assert isinstance(current_tetromino, Tetromino)
+    next_tetromino = tetris.next_tetromino()
+    assert isinstance(next_tetromino, Tetromino)

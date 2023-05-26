@@ -21,14 +21,17 @@ pub struct Tetromino {
     pub x: usize,
     #[pyo3(get)]
     pub y: usize,
+    #[pyo3(get)]
+    pub name: String,
 }
 
 impl Clone for Tetromino {
     fn clone(&self) -> Self {
         Tetromino {
-            area: self.area,
-            x: self.x,
-            y: self.y,
+            area: self.area.clone(),
+            x: self.x.clone(),
+            y: self.y.clone(),
+            name: self.name.clone(),
         }
     }
 }
@@ -181,6 +184,7 @@ impl Default for Tetromino {
                    [1,0,0,0]],
             x: WELL_WIDTH / 2, // horizontal starting position
             y: 0, // height
+            name: "straight".to_string(),
         }
     }
 }
@@ -246,6 +250,7 @@ impl TetrominoStraight for Tetromino {
              [1,0,0,0],
              [1,0,0,0],
              [1,0,0,0]],
+            name: "straight".to_string(),
             ..Default::default()
         }
     }
@@ -263,6 +268,7 @@ impl TetrominoSquare for Tetromino {
                    [1,1,0,0],
                    [0,0,0,0],
                    [0,0,0,0]],
+            name: "square".to_string(),
             ..Default::default()
         }
     }
@@ -280,6 +286,7 @@ impl TetrominoT for Tetromino {
              [0,1,0,0],
              [0,0,0,0],
              [0,0,0,0]],
+            name: "t".to_string(),
             ..Default::default()
         }
     }
@@ -298,6 +305,7 @@ impl TetrominoL for Tetromino {
              [1,0,0,0],
              [1,1,0,0],
              [0,0,0,0]],
+            name: "l".to_string(),
             ..Default::default()
         }
     }
@@ -315,6 +323,7 @@ impl TetrominoSkew for Tetromino {
              [0,1,1,0],
              [0,0,0,0],
              [0,0,0,0]],
+            name: "skew".to_string(),
             ..Default::default()
         }
     }
