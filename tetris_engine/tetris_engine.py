@@ -100,6 +100,12 @@ class Tetris:
         return self._game.grid
 
     def current_tetromino(self) -> Tetromino:
+        return self._map_tetromino_name_to_enum(self._game.current_tetromino.name)
+
+    def next_tetromino(self) -> Tetromino:
+        return self._map_tetromino_name_to_enum(self._game.next_tetromino.name)
+
+    def _map_tetromino_name_to_enum(self, name: str) -> Tetromino:
         if self._game.current_tetromino.name == "straight":
             return Tetromino.Straight
         elif self._game.current_tetromino.name == "square":
@@ -110,15 +116,5 @@ class Tetris:
             return Tetromino.L
         elif self._game.current_tetromino.name == "skew":
             return Tetromino.Skew
-
-    def next_tetromino(self) -> Tetromino:
-        if self._game.next_tetromino.name == "straight":
-            return Tetromino.Straight
-        elif self._game.next_tetromino.name == "square":
-            return Tetromino.Square 
-        elif self._game.next_tetromino.name == "t":
-            return Tetromino.T
-        elif self._game.next_tetromino.name == "l":
-            return Tetromino.L
-        elif self._game.next_tetromino.name == "skew":
-            return Tetromino.Skew
+        
+    
