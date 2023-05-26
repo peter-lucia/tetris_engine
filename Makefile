@@ -28,3 +28,11 @@ test-rust: ## Run the rust unit tests
 test-python: ## Run the python unit tests
 	python setup.py install
 	python -m pytest --log-cli-level=DEBUG -s tests/
+
+bumpversion: ## Increment the package version
+	# pip install -r requirements.txt -r requirements-test.txt
+	read -p "Enter the new version: " new_version && \
+		bumpversion --new-version $$new_version --allow-dirty --no-commit --tag \
+		pyproject.toml \
+		tetris_engine/__init__.py \
+		.bumpversion.cfg
