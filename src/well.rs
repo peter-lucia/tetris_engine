@@ -1,18 +1,11 @@
-use crate::tetromino::{Tetromino, TetrominoL, TETROMINO_HEIGHT, TETROMINO_WIDTH, TetrominoStraight, get_random_tetromino};
+use crate::tetromino::{Tetromino, TETROMINO_HEIGHT, TETROMINO_WIDTH, get_random_tetromino};
 use rand::Rng;
 use std::time::Duration;
-use std::io::Write;
-use crate::tetromino;
-use std::error::Error;
-use std::cmp::{min, max};
+use std::cmp::{max};
 use std::time::Instant;
-use std::borrow::BorrowMut;
 use std::{fs};
-use std::any::Any;
-use std::future::Future;
-use std::ops::DerefMut;
 use std::path::Path;
-use std::sync::{mpsc, Arc, Mutex, MutexGuard};
+use std::sync::{Mutex, MutexGuard};
 use std::mem;
 use std::thread;
 
@@ -64,7 +57,10 @@ pub struct Well {
     last_instant: Instant,
     #[pyo3(get, set)]
     pub grid: [[i32; WELL_WIDTH]; WELL_HEIGHT],
+    #[pyo3(get)]
     pub current_tetromino: Tetromino,
+    #[pyo3(get)]
+    pub next_tetromino: Tetromino,
     #[pyo3(get, set)]
     pub score: i32,
     pub running: bool,
@@ -159,6 +155,7 @@ impl Clone for Well {
             last_instant: self.last_instant,
             grid: self.grid,
             current_tetromino: self.current_tetromino.clone(),
+            next_tetromino: self.next_tetromino.clone(),
             score: self.score,
             running: self.running,
             fall_delay_ms: self.fall_delay_ms,
@@ -178,6 +175,7 @@ impl Tetris for Well {
             current_instant: Instant::now(),
             last_instant: Instant::now(),
             current_tetromino: get_random_tetromino(),
+            next_tetromino: get_random_tetromino(),
             score: 0,
             running: true,
             fall_delay_ms: 1000,
@@ -202,7 +200,8 @@ impl Tetris for Well {
         if self.current_tetromino.is_stuck(self.grid) && self.current_tetromino.y != 0 {
             self.current_tetromino.stick_to_grid(&mut self.grid);
             log::info!("Current tetromino is stuck!");
-            self.current_tetromino = get_random_tetromino();
+            self.current_tetromino = self.next_tetromino.clone();
+            self.next_tetromino = get_random_tetromino();
         }
     }
 

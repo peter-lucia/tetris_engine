@@ -12,6 +12,14 @@ class Direction(enum.Enum):
     LeftRotate = enum.auto()
 
 
+class Tetromino(enum.Enum):
+   Straight = enum.auto() 
+   Square = enum.auto()
+   T = enum.auto()
+   L = enum.auto()
+   Skew = enum.auto()
+
+
 class Tetris:
     """
     A tetris engine powered by rust
@@ -90,3 +98,23 @@ class Tetris:
             self._game = read_game_multithreaded()
 
         return self._game.grid
+
+    def current_tetromino(self) -> Tetromino:
+        return self._map_tetromino_name_to_enum(self._game.current_tetromino.name)
+
+    def next_tetromino(self) -> Tetromino:
+        return self._map_tetromino_name_to_enum(self._game.next_tetromino.name)
+
+    def _map_tetromino_name_to_enum(self, name: str) -> Tetromino:
+        if self._game.current_tetromino.name == "straight":
+            return Tetromino.Straight
+        elif self._game.current_tetromino.name == "square":
+            return Tetromino.Square 
+        elif self._game.current_tetromino.name == "t":
+            return Tetromino.T
+        elif self._game.current_tetromino.name == "l":
+            return Tetromino.L
+        elif self._game.current_tetromino.name == "skew":
+            return Tetromino.Skew
+        
+    

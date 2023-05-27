@@ -1,6 +1,7 @@
 use std::cmp::{max, min};
 use rand::Rng;
 use crate::well::{WELL_WIDTH, WELL_HEIGHT};
+use pyo3::prelude::*;
 
 pub const TETROMINO_WIDTH: usize = 4;
 pub const TETROMINO_HEIGHT: usize = 4;
@@ -12,18 +13,25 @@ pub const TETROMINO_HEIGHT: usize = 4;
 ///     * y (width) position in the well coordinate plane
 /// ## Resources
 ///     * https://www.youtube.com/watch?v=8OK8_tHeCIA
+#[pyclass]
 pub struct Tetromino {
+    #[pyo3(get)]
     pub area: [[i32; TETROMINO_WIDTH]; TETROMINO_HEIGHT],
+    #[pyo3(get)]
     pub x: usize,
+    #[pyo3(get)]
     pub y: usize,
+    #[pyo3(get)]
+    pub name: String,
 }
 
 impl Clone for Tetromino {
     fn clone(&self) -> Self {
         Tetromino {
-            area: self.area,
-            x: self.x,
-            y: self.y,
+            area: self.area.clone(),
+            x: self.x.clone(),
+            y: self.y.clone(),
+            name: self.name.clone(),
         }
     }
 }
@@ -176,6 +184,7 @@ impl Default for Tetromino {
                    [1,0,0,0]],
             x: WELL_WIDTH / 2, // horizontal starting position
             y: 0, // height
+            name: "straight".to_string(),
         }
     }
 }
@@ -241,6 +250,7 @@ impl TetrominoStraight for Tetromino {
              [1,0,0,0],
              [1,0,0,0],
              [1,0,0,0]],
+            name: "straight".to_string(),
             ..Default::default()
         }
     }
@@ -258,6 +268,7 @@ impl TetrominoSquare for Tetromino {
                    [1,1,0,0],
                    [0,0,0,0],
                    [0,0,0,0]],
+            name: "square".to_string(),
             ..Default::default()
         }
     }
@@ -275,6 +286,7 @@ impl TetrominoT for Tetromino {
              [0,1,0,0],
              [0,0,0,0],
              [0,0,0,0]],
+            name: "t".to_string(),
             ..Default::default()
         }
     }
@@ -293,6 +305,7 @@ impl TetrominoL for Tetromino {
              [1,0,0,0],
              [1,1,0,0],
              [0,0,0,0]],
+            name: "l".to_string(),
             ..Default::default()
         }
     }
@@ -310,6 +323,7 @@ impl TetrominoSkew for Tetromino {
              [0,1,1,0],
              [0,0,0,0],
              [0,0,0,0]],
+            name: "skew".to_string(),
             ..Default::default()
         }
     }
