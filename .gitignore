@@ -8,3 +8,5 @@ build/
 tetris_engine.egg-info/
 .vscode/
 dist/
+*.so
+.run/

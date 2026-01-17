@@ -357,7 +357,7 @@ mod tests {
              [1,1,0,0],
         ];
         t.rotate(false);
-        let mut expected_result =
+        let expected_result =
             [[1,1,1,1],
              [1,1,0,0],
              [0,0,0,0],
@@ -376,7 +376,7 @@ mod tests {
                 [1,1,0,0],
             ];
         t.rotate(false);
-        let mut expected_result =
+        let expected_result =
             [
                 [1,1,1,1],
                 [1,1,0,0],
@@ -433,7 +433,7 @@ mod tests {
              [9,10,11,12],
              [13,14,15,16]];
         t.rotate(false);
-        let mut expected_result =
+        let expected_result =
             [[13,9,5,1],
              [14,10,6,2],
              [15,11,7,3],
