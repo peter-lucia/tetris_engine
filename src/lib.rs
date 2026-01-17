@@ -29,14 +29,13 @@ fn write_game_multithreaded(_well: Well) -> () {
 }
 
 /// So in python we can do: from rust_tetris import get_well
-/// Example code: https://pyo3.rs/v0.14.5/module.html
+/// Example code: https://pyo3.rs/v0.27.2/module.html
 /// 'static lifetimes live the duration of the program
 /// Lifetime Sources:
 /// https://doc.rust-lang.org/reference/lifetime-elision.html#lifetime-elision-in-functions
 /// https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html
-#[pymodule]
-#[pyo3(name = "tetris_engine_backend")]
-fn setup_tetris(py: Python<'_>, m: &PyModule) -> PyResult<()> {
+#[pyo3::pymodule]
+fn tetris_engine_backend(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(create_game, m)?)?;
     m.add_function(wrap_pyfunction!(read_game_multithreaded, m)?)?;
     m.add_function(wrap_pyfunction!(write_game_multithreaded, m)?)?;

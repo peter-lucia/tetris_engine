@@ -1,11 +1,7 @@
 #[macro_use]
 extern crate lazy_static;
-use std::borrow::{Borrow, BorrowMut};
-use std::rc::Rc;
-use std::sync::{Arc, Mutex};
-use std::thread;
-use std::time::Duration;
 use crate::well::{Tetris, Well};
+use std::borrow::{Borrow, BorrowMut};
 
 mod tetromino;
 mod well;

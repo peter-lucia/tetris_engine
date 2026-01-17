@@ -18,14 +18,20 @@ build-python-linux: ## Build the python package for a particular platform
 	# https://cibuildwheel.readthedocs.io/en/stable/setup/
 	cibuildwheel --platform linux
 
-build-bin-darwin: ## Build the rust binary app for macOS
+build-bin-darwin-debug: ## Build the rust binary app for macOS
 	cargo build --bin tetris_engine_backend --target aarch64-apple-darwin --package tetris_engine_backend
+
+build-bin-darwin-release: ## Build the rust binary app for macOS
+	cargo build --bin tetris_engine_backend --target aarch64-apple-darwin --package tetris_engine_backend --release
 
 test-rust: ## Run the rust unit tests
 	cargo test --lib --package=tetris_engine_backend
 
 test: ## Run the python unit tests
 	export PYTHONPATH=$$(pwd) && pytest tests/ --log-cli-level=DEBUG -s
+
+run: ## Run the tetris game
+	cargo run --package tetris_engine_backend --bin tetris_engine_backend
 
 bumpversion: ## Increment the package version
 	# pip install -r requirements.txt -r requirements-test.txt
