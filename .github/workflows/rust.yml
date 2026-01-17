@@ -73,4 +73,4 @@ jobs:
         uv sync --all-groups
     - name: Test with pytest
       run: |
-        uv run pytest tests/ --log-cli-level=DEBUG -s
+        export PYTHONPATH=$(pwd) && uv run pytest tests/ --log-cli-level=DEBUG -s
